@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "mocha --recursive --slow=10000 --check-leaks --exit --timeout=5000"
+    "test": "mocha --recursive --slow=10000 --check-leaks --exit --timeout=5000",
+    "dev:db:create": "npx sequelize-cli --env dev --config=database/config.json db:create",
+    "dev:db:migrate": "npx sequelize-cli --env dev --config=database/config.json db:migrate"
+
   },
   "repository": {
     "type": "git",
