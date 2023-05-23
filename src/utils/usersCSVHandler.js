@@ -7,12 +7,12 @@ const DEFAULT_OPTION = {
   fields: ["name", "city", "country", "favorite_sport"]
 }
 
-class FileHandler {
+class UsersCSVHandler {
   static async csvToJson(filePath) {
-    const content = await FileHandler.getFileContent(filePath)
-    const validation = FileHandler.isValid(content)
+    const content = await UsersCSVHandler.getFileContent(filePath)
+    const validation = UsersCSVHandler.isValid(content)
     if (!validation.valid) throw new Error(validation.error)
-    return FileHandler.parseCSVToJSON(content)
+    return UsersCSVHandler.parseCSVToJSON(content)
   }
 
   static async getFileContent(filePath) {
@@ -61,4 +61,4 @@ class FileHandler {
   }
 }
 
-module.exports = FileHandler
+module.exports = UsersCSVHandler
