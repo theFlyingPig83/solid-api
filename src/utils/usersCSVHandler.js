@@ -54,7 +54,7 @@ class UsersCSVHandler {
       for (const index in columns) {
         user[header[index]] = columns[index]
       }
-      return new User(user)
+      return user
     })
     
     return users

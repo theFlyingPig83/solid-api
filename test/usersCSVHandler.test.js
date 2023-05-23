@@ -34,37 +34,37 @@ describe('users CSV Handler Suite Tests', () => {
         "name": "John Doe",
         "city": "New York",
         "country": "USA",
-        "favoriteSport": "Basketball"
+        "favorite_sport": "Basketball"
       },
       {
         "name": "Jane Smith",
         "city": "London",
         "country": "UK",
-        "favoriteSport": "Football"
+        "favorite_sport": "Football"
       },
       {
         "name": "Mike Johnson",
         "city": "Paris",
         "country": "France",
-        "favoriteSport": "Tennis"
+        "favorite_sport": "Tennis"
       },
       {
         "name": "Karen Lee",
         "city": "Tokyo",
         "country": "Japan",
-        "favoriteSport": "Swimming"
+        "favorite_sport": "Swimming"
       },
       {
         "name": "Tom Brown",
         "city": "Sydney",
         "country": "Australia",
-        "favoriteSport": "Running"
+        "favorite_sport": "Running"
       },
       {
         "name": "Emma Wilson",
         "city": "Berlin",
         "country": "Germany",
-        "favoriteSport": "Basketball"
+        "favorite_sport": "Basketball"
       },
     ]
     expect(result).to.deep.equal(expected);
