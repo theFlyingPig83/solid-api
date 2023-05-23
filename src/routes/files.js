@@ -1,5 +1,6 @@
-const express = require('express')
+const express = require('express');
+const fileController = require('../controllers/fileController');
 const router = express.Router();
 
-router.post("/", (req, res) => res.send('Files'));
+router.post("/", fileController.create);
 module.exports = router;
