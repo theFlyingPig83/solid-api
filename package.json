@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --recursive --slow=10000 --check-leaks --exit --timeout=5000"
   },
   "repository": {
     "type": "git",
@@ -19,9 +19,14 @@
   },
   "homepage": "https://github.com/GRenkel/back-end-challenge#readme",
   "dependencies": {
+    "chai": "^4.3.7",
+    "chai-as-promised": "^7.1.1",
+    "chai-http": "^4.3.0",
     "csv-parser": "^3.0.0",
     "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1"
+    "mocha": "^10.2.0",
+    "multer": "^1.4.5-lts.1",
+    "stub": "^0.3.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
