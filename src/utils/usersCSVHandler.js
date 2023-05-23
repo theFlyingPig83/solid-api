@@ -13,7 +13,7 @@ class UsersCSVHandler {
   static async parseUsers(filePath) {
     const content = await UsersCSVHandler.getFileContent(filePath)
     const validation = UsersCSVHandler.isValid(content)
-    if (!validation.valid) throw new ApiError(...validation.message, HttpStatusCode.BAD_REQUEST, validation.uiMessage, validation.__filename)
+    if (!validation.valid) throw new ApiError(validation.message, HttpStatusCode.BAD_REQUEST, validation.uiMessage, validation.__filename)
     return UsersCSVHandler.parseCSVToJSON(content)
   }
 

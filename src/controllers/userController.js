@@ -1,5 +1,5 @@
 module.exports = {
-  list: async (req, res) => {
+  list: async (req, res, next) => {
     try {
       const users = ['Elton', 'John'];
       res.json(users)
