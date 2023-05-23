@@ -1,7 +1,7 @@
 const chaiHttp = require('chai-http');
 const chai = require('chai')
 const server = require('../../server');
-const HttpStatusCode = require('../../src/Enums/HttpStatusCode');
+const HttpStatusCode = require('../../src/constants/HttpStatusCode');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiHttp);
 const expect = chai.expect;
