@@ -8,14 +8,12 @@ const storage = multer.diskStorage({
     cb(null, destination);
   },
   filename: function (req, file, cb) {
-    // Utilize um nome de arquivo único
     cb(null, Date.now() + '-' + file.originalname);
   }
 });
 
 const csvFilter = function (req, file, cb) {
   if (file.mimetype !== 'text/csv') {
-    // Rejeitar arquivos que não sejam CSV
     cb(new Error('Only CSV files are allowed!'), false);
   } else {
     cb(null, true);
