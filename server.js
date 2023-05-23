@@ -1,10 +1,12 @@
 const express = require('express')
 const mainRouter = require('./src/routes/index')
-const app = express()
+const server = express()
 const port = process.env.PORT || 3000
 
-app.use('/api', mainRouter)
+server.use('/api', mainRouter)
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is listing on port: ${port}`)
 })
+
+module.exports = server
