@@ -8,7 +8,7 @@ const DEFAULT_OPTION = {
 }
 
 class UsersCSVHandler {
-  static async csvToJson(filePath) {
+  static async parseUsers(filePath) {
     const content = await UsersCSVHandler.getFileContent(filePath)
     const validation = UsersCSVHandler.isValid(content)
     if (!validation.valid) throw new Error(validation.error)

@@ -1,15 +1,14 @@
 const FileErrors = require('../src/constants/FileErrors')
 const UsersCSVHandler = require('../src/utils/usersCSVHandler')
-const { rejects, deepStrictEqual } = require('assert')
 const chai = require('chai')
 const expect = chai.expect;
 
-describe('File Handler Suite Tests', () => {
+describe('users CSV Handler Suite Tests', () => {
   it('Should throw an error for invalid files', async () => {
     const filePath = './test/mocks/emptyFile-invalid.csv'
     const rejection = new Error(FileErrors.FILE_LENGTH_ERROR_MESSAGE)
     try {
-      await UsersCSVHandler.csvToJson(filePath);
+      await UsersCSVHandler.parseUsers(filePath);
       expect.fail('Expected an error to be thrown');
     } catch (error) {
       expect(error).to.deep.equal(rejection);
@@ -20,7 +19,7 @@ describe('File Handler Suite Tests', () => {
     const filePath = './test/mocks/invalid-header.csv'
     const rejection = new Error(FileErrors.FILE_FIELDS_ERROR_MESSAGE)
     try {
-      await UsersCSVHandler.csvToJson(filePath);
+      await UsersCSVHandler.parseUsers(filePath);
       expect.fail('Expected an error to be thrown');
     } catch (error) {
       expect(error).to.deep.equal(rejection);
@@ -29,7 +28,7 @@ describe('File Handler Suite Tests', () => {
 
    it('The parsed CSV should has the expected JSON structure', async () => {
     const filePath = './test/mocks/valid.csv'
-    const result = await UsersCSVHandler.csvToJson(filePath)
+    const result = await UsersCSVHandler.parseUsers(filePath)
     const expected = [
       {
         "name": "John Doe",
