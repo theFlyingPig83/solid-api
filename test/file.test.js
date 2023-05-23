@@ -16,6 +16,17 @@ describe('File Handler Suite Tests', () => {
     }
    })
 
+   it('Should throw an error for a file with invalid header', async () => {
+    const filePath = './test/mocks/invalid-header.csv'
+    const rejection = new Error(FileErrors.FILE_FIELDS_ERROR_MESSAGE)
+    try {
+      await FileHandler.csvToJson(filePath);
+      expect.fail('Expected an error to be thrown');
+    } catch (error) {
+      expect(error).to.deep.equal(rejection);
+    }
+   })
+
    it('The parsed CSV should has the expected JSON structure', async () => {
     const filePath = './test/mocks/valid.csv'
     const result = await FileHandler.csvToJson(filePath)
