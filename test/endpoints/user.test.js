@@ -16,6 +16,7 @@ describe('/GET USERS', () => {
       .get(ENDPOINT)
       .end((err, res) => {
         expect(res).to.have.status(HttpStatusCode.SUCCESS);
+        expect(res.body).to.be.an('array')
         done();
       })
   })
