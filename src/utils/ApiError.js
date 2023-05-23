@@ -1,10 +1,11 @@
 class ApiError extends Error {
   
-  constructor({ message, error, uiMessage, level }) {
+  constructor(message, httpStatus, uiMessage, level, error) {
     super(message);
-    this.error = error;
     this.uiMessage = uiMessage;
     this.level = level
+    this.httpStatus = httpStatus
+    this.error = error;
   }
 }
 

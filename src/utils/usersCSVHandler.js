@@ -2,6 +2,8 @@ const { readFile } = require('fs/promises')
 const FileErrors = require('../constants/FileErrors')
 const { join } = require('path')
 const User = require('../models/user')
+const ApiError = require('./ApiError')
+const HttpStatusCode = require('../constants/HttpStatusCode')
 
 const DEFAULT_OPTION = {
   fields: ["name", "city", "country", "favorite_sport"]
@@ -11,7 +13,7 @@ class UsersCSVHandler {
   static async parseUsers(filePath) {
     const content = await UsersCSVHandler.getFileContent(filePath)
     const validation = UsersCSVHandler.isValid(content)
-    if (!validation.valid) throw new Error(validation.error)
+    if (!validation.valid) throw new ApiError(...validation.message, HttpStatusCode.BAD_REQUEST, validation.uiMessage, validation.__filename)
     return UsersCSVHandler.parseCSVToJSON(content)
   }
 
@@ -26,7 +28,9 @@ class UsersCSVHandler {
     const isHeaderValid = header === options.fields.join(',')
     if (!isHeaderValid) {
       return {
-        error: FileErrors.FILE_FIELDS_ERROR_MESSAGE,
+        message: FileErrors.FILE_FIELDS_ERROR_MESSAGE,
+        uiMessage: FileErrors.FILE_FIELDS_ERROR_UI_MESSAGE,
+        __filename,
         valid: false
       }
     }
@@ -35,7 +39,9 @@ class UsersCSVHandler {
 
     if (!isContentLengthAccepted) {
       return {
-        error: FileErrors.FILE_LENGTH_ERROR_MESSAGE,
+        message: FileErrors.FILE_LENGTH_ERROR_MESSAGE,
+        uiMessage: FileErrors.FILE_LENGTH_ERROR_UI_MESSAGE,
+        __filename,
         valid: false
       }
     }
@@ -56,7 +62,7 @@ class UsersCSVHandler {
       }
       return user
     })
-    
+
     return users
   }
 }

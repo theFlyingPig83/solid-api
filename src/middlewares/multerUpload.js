@@ -1,5 +1,8 @@
 const multer = require('multer');
 const path = require('path');
+const ApiError = require('../utils/ApiError');
+const HttpStatusCode = require('../constants/HttpStatusCode');
+const FileErrors = require('../constants/FileErrors');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -14,9 +17,9 @@ const storage = multer.diskStorage({
 
 const csvFilter = function (req, file, cb) {
   if (file.mimetype !== 'text/csv') {
-    cb(new Error('Only CSV files are allowed!'), false);
+    cb(new ApiError(FileErrors.FILE_TYPE_NOT_ALLOWED, HttpStatusCode.BAD_REQUEST, FileErrors.FILE_TYPE_NOT_ALLOWED_UI_MESSAGE, __filename), false);
   } else {
     cb(null, true);
   }
 };
-module.exports = multer({ storage: storage, fileFilter: csvFilter});
+module.exports = multer({ storage: storage, fileFilter: csvFilter });

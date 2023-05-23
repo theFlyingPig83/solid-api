@@ -2,6 +2,8 @@
 
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../../database/sequelize');
+const ApiError = require('../utils/ApiError');
+const UsersErrors = require('../constants/UsersErrors');
 class User extends Model {
   static associate(models) {
     // define association here
@@ -12,8 +14,7 @@ class User extends Model {
       const rows = await User.bulkCreate(data)
       return rows
     } catch (error) {
-      console.log('[LOG] - MODEL USER - Failed to create users: ', error)
-      throw new Error('Failed to create users')
+      throw new ApiError(UsersErrors.FAILED_TO_CREATE_ERROR_MESSAGE, UsersErrors.FAILED_TO_CREATE_ERROR_UI_MESSAGE, __filename, error)
     }
   }
 }

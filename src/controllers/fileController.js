@@ -9,7 +9,7 @@ module.exports = {
       const result = await User.createUsers(parsedUsers)
       res.send(result)
     } catch (error) {
-      res.status(HttpStatusCode.INTERNAL_ERROR).send({error})
+      next(error)
     }
   }
 }
