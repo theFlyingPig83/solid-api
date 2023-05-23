@@ -1,10 +1,21 @@
-class User {
-  constructor({ name, city, country, favorite_sport }) {
-    this.name = name
-    this.city = city
-    this.country = country
-    this.favoriteSport = favorite_sport
+'use strict';
+const {
+  Model
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    static associate(models) {
+      // define association here
+    }
   }
-}
-
-module.exports = User
+  User.init({
+    name: DataTypes.STRING,
+    city: DataTypes.STRING,
+    country: DataTypes.STRING,
+    favorite_sport: DataTypes.STRING
+  }, {
+    sequelize,
+    modelName: 'User',
+  });
+  return User;
+};
