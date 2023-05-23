@@ -6,8 +6,9 @@
   "scripts": {
     "start": "nodemon server.js",
     "test": "mocha --recursive --slow=10000 --check-leaks --exit --timeout=5000",
-    "dev:db:create": "npx sequelize-cli --env dev --config=database/config.json db:create",
-    "dev:db:migrate": "npx sequelize-cli --env dev --config=database/config.json db:migrate"
+    "dev:db:create": "npx sequelize-cli --env dev db:create",
+    "dev:db:drop": "npx sequelize-cli --env dev db:drop",
+    "dev:db:migrate": "npx sequelize-cli --env dev db:migrate"
 
   },
   "repository": {
