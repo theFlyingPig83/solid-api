@@ -1,7 +1,5 @@
-const path = require('path');
 const ApiError = require('../utils/ApiError');
 const HttpStatusCode = require('../constants/HttpStatusCode');
-const PayloadErrors = require('../constants/PayloadErrors');
 const SessionErrors = require('../constants/SessionErrors');
 
 function sessionChecker(req, res, next) {
