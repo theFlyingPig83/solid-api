@@ -5,7 +5,7 @@ const PayloadErrors = require('../constants/PayloadErrors');
 
 function payloadChecker(req, res, next) {
   if (req.file === undefined) {
-    next(new ApiError(PayloadErrors.MISSING_CSV_ERROR_MESSAGE, HttpStatusCode.BAD_REQUEST, PayloadErrors.MISSING_CSV_ERROR_UI_MESSAGE, __filename))
+    return next(new ApiError(PayloadErrors.MISSING_CSV_ERROR_MESSAGE, HttpStatusCode.BAD_REQUEST, PayloadErrors.MISSING_CSV_ERROR_UI_MESSAGE, __filename))
   }
   next()
 }

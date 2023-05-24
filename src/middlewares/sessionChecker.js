@@ -6,7 +6,7 @@ const SessionErrors = require('../constants/SessionErrors');
 
 function sessionChecker(req, res, next) {
   if(req.headers.session_id === undefined){
-    next(new ApiError(SessionErrors.MISSING_SESSION_ID_ERROR_MESSAGE, HttpStatusCode.BAD_REQUEST, SessionErrors.MISSING_SESSION_ID_UI_ERROR_MESSAGE, __filename))  
+    return next(new ApiError(SessionErrors.MISSING_SESSION_ID_ERROR_MESSAGE, HttpStatusCode.BAD_REQUEST, SessionErrors.MISSING_SESSION_ID_UI_ERROR_MESSAGE, __filename))  
   }
   next()
 }
