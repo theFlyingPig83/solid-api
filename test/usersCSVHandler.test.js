@@ -11,7 +11,7 @@ describe('users CSV Handler Suite Tests', () => {
       await UsersCSVHandler.parseUsers(filePath);
       expect.fail('Expected an error to be thrown');
     } catch (error) {
-      expect(error).to.deep.equal(rejection);
+      expect(error.message).to.be.equal(rejection.message);
     }
    })
 
@@ -22,7 +22,7 @@ describe('users CSV Handler Suite Tests', () => {
       await UsersCSVHandler.parseUsers(filePath);
       expect.fail('Expected an error to be thrown');
     } catch (error) {
-      expect(error).to.deep.equal(rejection);
+      expect(error.message).to.be.equal(rejection.message);
     }
    })
 
