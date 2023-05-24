@@ -4,12 +4,13 @@ const { Model, DataTypes, Op } = require('sequelize');
 const sequelize = require('../../database/sequelize');
 const ApiError = require('../utils/ApiError');
 const UsersErrors = require('../constants/UsersErrors');
+const HttpStatusCode = require('../constants/HttpStatusCode');
 class User extends Model {
   static associate(models) {
     // define association here
   }
 
-  static addSessionIdToUser(user, sessionId){
+  static addSessionIdToUser(user, sessionId) {
     user.session_id = sessionId
     return user
   }
@@ -17,10 +18,10 @@ class User extends Model {
   static async createUsers(data, sessionId) {
     try {
       const formattedUsers = data.map(user => this.addSessionIdToUser(user, sessionId))
-      const rows =  await User.bulkCreate(formattedUsers)
+      const rows = await User.bulkCreate(formattedUsers)
       return rows
     } catch (error) {
-      throw new ApiError(UsersErrors.FAILED_TO_CREATE_ERROR_MESSAGE, UsersErrors.FAILED_TO_CREATE_ERROR_UI_MESSAGE, __filename, error)
+      throw new ApiError(UsersErrors.FAILED_TO_CREATE_ERROR_MESSAGE,HttpStatusCode.INTERNAL_ERROR, UsersErrors.FAILED_TO_CREATE_ERROR_UI_MESSAGE, __filename, error)
     }
   }
 
@@ -32,7 +33,7 @@ class User extends Model {
       ).findAll();
       return rows
     } catch (error) {
-      throw new ApiError(UsersErrors.FAILED_TO_CREATE_ERROR_MESSAGE, UsersErrors.FAILED_TO_CREATE_ERROR_UI_MESSAGE, __filename, error)
+      throw new ApiError(UsersErrors.FAILED_TO_LIST_ERROR_MESSAGE,HttpStatusCode.INTERNAL_ERROR, UsersErrors.FAILED_TO_LIST_ERROR_UI_MESSAGE, __filename, error)
     }
   }
 }
