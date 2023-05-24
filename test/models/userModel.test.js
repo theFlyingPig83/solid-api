@@ -4,12 +4,12 @@ const chai = require('chai');
 const sinon = require('sinon');
 const { expect } = chai;
 const { Model } = require('sequelize');
-const User = require('../src/models/user'); // Importe o modelo User do arquivo correspondente
-const ApiError = require('../src/utils/ApiError');
-const UsersErrors = require('../src/constants/UsersErrors');
-const HttpStatusCode = require('../src/constants/HttpStatusCode');
+const User = require('../../src/models/user'); // Importe o modelo User do arquivo correspondente
+const ApiError = require('../../src/utils/ApiError');
+const UsersErrors = require('../../src/constants/UsersErrors');
+const HttpStatusCode = require('../../src/constants/HttpStatusCode');
 
-describe('User Model', () => {
+describe('User Model Suite Tests', () => {
 
   describe('addSessionIdToUser method', () => {
     it('should add session_id to user', () => {
