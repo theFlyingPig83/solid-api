@@ -1,9 +1,9 @@
 const express = require('express');
 const fileController = require('../controllers/fileController');
-const multerUploadMiddleware = require('../middlewares/multerUpload');
-const checkPayloadMiddleware = require('../middlewares/checkPayload');
+const {uploadMiddleware} = require('../middlewares/multerUpload');
+const payloadChecker = require('../middlewares/payloadChecker');
 const router = express.Router();
 
-router.post("/", multerUploadMiddleware.single('file'), checkPayloadMiddleware, fileController.create);
+router.post("/", uploadMiddleware.single('file'), payloadChecker, fileController.create);
 
 module.exports = router;

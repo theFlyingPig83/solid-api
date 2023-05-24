@@ -22,4 +22,6 @@ const csvFilter = function (req, file, cb) {
     cb(null, true);
   }
 };
-module.exports = multer({ storage: storage, fileFilter: csvFilter });
+module.exports = {
+  uploadMiddleware: multer({ storage: storage, fileFilter: csvFilter })
+};

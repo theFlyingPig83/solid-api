@@ -1,8 +1,8 @@
 const UsersCSVHandler = require("../utils/usersCSVHandler")
 const User = require('../models/user')
-const HttpStatusCode = require("../constants/HttpStatusCode")
+
 module.exports = {
-  create: async (req, res, next) => {
+  create: async function create (req, res, next) {
     try {
       const uploadedCSVPath = req.file.path
       const parsedUsers = await UsersCSVHandler.parseUsers(uploadedCSVPath)
