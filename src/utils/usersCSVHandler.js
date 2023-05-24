@@ -18,7 +18,6 @@ class UsersCSVHandler {
   }
 
   static async getFileContent(filePath) {
-    // const filename = join(__dirname, filePath)
     const filename = filePath
     return (await readFile(filename)).toString("utf8").replace(/\r/g, '')
   }
