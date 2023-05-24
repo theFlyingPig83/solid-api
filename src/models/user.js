@@ -16,9 +16,7 @@ class User extends Model {
 
   static async createUsers(data, sessionId) {
     try {
-
       const formattedUsers = data.map(user => this.addSessionIdToUser(user, sessionId))
-
       const rows =  await User.bulkCreate(formattedUsers)
       return rows
     } catch (error) {
