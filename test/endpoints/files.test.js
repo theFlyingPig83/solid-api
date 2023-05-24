@@ -7,15 +7,26 @@ chai.use(chaiHttp);
 const expect = chai.expect;
 chai.use(chaiAsPromised).should();
 
-const ENDPOINT = '/api/users/'
+const ENDPOINT = '/api/files/'
 
 describe('/POST FILES', () => {
-  it('Should reach the API a sucessfull response code', done => {
 
+  it('Should return a error message and a ui error message', done => {
     chai.request(server)
-      .get(ENDPOINT)
+      .post(ENDPOINT)
       .end((err, res) => {
-        expect(res).to.have.status(HttpStatusCode.SUCCESS);
+        expect(res).to.have.status(HttpStatusCode.BAD_REQUEST);
+        expect(res.body).to.have.property('error')
+        expect(res.body).to.have.property('uiMessage')
+        done();
+      })
+  })
+
+  it('Should return a bad request status code', done => {
+    chai.request(server)
+      .post(ENDPOINT)
+      .end((err, res) => {
+        expect(res).to.have.status(HttpStatusCode.BAD_REQUEST);
         done();
       })
   })
@@ -24,6 +35,7 @@ describe('/POST FILES', () => {
 
     chai.request(server)
       .get(ENDPOINT+'/teste')
+      .set('session_id', 'mocked-id')
       .end((err, res) => {
         expect(res).to.have.status(HttpStatusCode.NOT_FOUND);
         done();
