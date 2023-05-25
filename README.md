@@ -4,9 +4,9 @@ This project uses sequelize as ORM and also uses a Postgres database
 ### `the database config can be found under the path /database/config.json`
 ### `CHANGE YOUR POSTGRES USER AND PASSWORD IF NEEDED`
 
-### POSTMAN DOC
-## There is a postman collection under the path /PostmanCollection/Back-End Challenge.postman_collection.json
-## Use it for testing if needed
+# POSTMAN DOC
+There is a postman collection under the path /PostmanCollection/Back-End Challenge.postman_collection.json
+Use it for testing if needed
 
 ## Running the project
 ### run the following commands in the given order
