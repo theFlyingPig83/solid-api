@@ -15,13 +15,32 @@ class User extends Model {
     return user
   }
 
+  static async saveInBatches(data) {
+    const filesLength = data.length;
+    const batchSize = 300
+    const NumberOfbatches = Math.ceil(filesLength / batchSize);
+    let promiseBatch = []
+
+    for (let i = 0; i < NumberOfbatches; i++) {
+      const begin = i * batchSize;
+      const end = Math.min((i + 1) * batchSize, filesLength);
+      const currentBatch = data.slice(begin, end);
+      promiseBatch.push(User.bulkCreate(currentBatch));
+    }
+    const results = await Promise.all(promiseBatch)
+    return results.flat().splice(0, batchSize);
+  }
+
   static async createUsers(data, sessionId) {
+    const transaction = await sequelize.transaction();
     try {
       const formattedUsers = data.map(user => this.addSessionIdToUser(user, sessionId))
-      const rows = await User.bulkCreate(formattedUsers)
+      const rows = await this.saveInBatches(formattedUsers)
+      await transaction.commit();
       return rows
     } catch (error) {
-      throw new ApiError(UsersErrors.FAILED_TO_CREATE_ERROR_MESSAGE,HttpStatusCode.INTERNAL_ERROR, UsersErrors.FAILED_TO_CREATE_ERROR_UI_MESSAGE, __filename, error)
+      await transaction.rollback();
+      throw new ApiError(UsersErrors.FAILED_TO_CREATE_ERROR_MESSAGE, HttpStatusCode.INTERNAL_ERROR, UsersErrors.FAILED_TO_CREATE_ERROR_UI_MESSAGE, __filename, error)
     }
   }
 
@@ -33,7 +52,7 @@ class User extends Model {
       ).findAll();
       return rows
     } catch (error) {
-      throw new ApiError(UsersErrors.FAILED_TO_LIST_ERROR_MESSAGE,HttpStatusCode.INTERNAL_ERROR, UsersErrors.FAILED_TO_LIST_ERROR_UI_MESSAGE, __filename, error)
+      throw new ApiError(UsersErrors.FAILED_TO_LIST_ERROR_MESSAGE, HttpStatusCode.INTERNAL_ERROR, UsersErrors.FAILED_TO_LIST_ERROR_UI_MESSAGE, __filename, error)
     }
   }
 }
