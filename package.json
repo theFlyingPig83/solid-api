@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "mocha --recursive --exit --timeout=5000",
+    "test": "mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
     "test:cov": "npx nyc npx mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
     "dev:db:create": "npx sequelize-cli --env dev db:create",
     "dev:db:drop": "npx sequelize-cli --env dev db:drop",
