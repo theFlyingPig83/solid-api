@@ -3,6 +3,7 @@ This project uses sequelize as ORM and also uses a Postgres database
 ### `make sure you have postgres on your machine`
 
 ## Running the project
+### run the following commands in the given order
 ### `npm run dev:db:create` will create a new database
 ### `npm run dev:db:migrate` will create the database structure
 ### `npm run dev:db:drop` will drop the database
