@@ -4,7 +4,7 @@ const chai = require('chai');
 const sinon = require('sinon');
 const { expect } = chai;
 const { Model, Transaction } = require('sequelize');
-const User = require('../../src/models/user'); 
+const User = require('../../src/models/user');
 const ApiError = require('../../src/utils/ApiError');
 const UsersErrors = require('../../src/constants/UsersErrors');
 const HttpStatusCode = require('../../src/constants/HttpStatusCode');
@@ -12,10 +12,10 @@ const sequelize = require('../../database/sequelize');
 
 describe('User Model Suite Tests', () => {
 
-  afterEach(()=>{
+  afterEach(() => {
     sinon.restore()
   })
-  
+
   describe('addSessionIdToUser method', () => {
     it('should add session_id to user', () => {
       const user = { name: 'John Doe' };
@@ -82,6 +82,7 @@ describe('User Model Suite Tests', () => {
       const rows = await User.listAll({ query, sessionId });
 
       expect(scopeStub.calledWith(
+        { method: ['default'] },
         { method: ['bySession', sessionId] },
         { method: ['findByQuery', query] }
       )).to.be.true;
