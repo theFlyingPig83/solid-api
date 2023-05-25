@@ -3,11 +3,14 @@ const path = require('path');
 const ApiError = require('../utils/ApiError');
 const HttpStatusCode = require('../constants/HttpStatusCode');
 const FileErrors = require('../constants/FileErrors');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const destination = path.resolve(__dirname, '..', '..', 'uploads')
-
+    if (!fs.existsSync(destination)) {
+      fs.mkdirSync(destination, { recursive: true })
+  }
     cb(null, destination);
   },
   filename: function (req, file, cb) {
