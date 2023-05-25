@@ -5,6 +5,7 @@ const sequelize = require('../../database/sequelize');
 const ApiError = require('../utils/ApiError');
 const UsersErrors = require('../constants/UsersErrors');
 const HttpStatusCode = require('../constants/HttpStatusCode');
+const MAXIMUM_RETURN = 50;
 class User extends Model {
   static associate(models) {
     // define association here
@@ -28,7 +29,7 @@ class User extends Model {
       promiseBatch.push(User.bulkCreate(currentBatch));
     }
     const results = await Promise.all(promiseBatch)
-    return results.flat().splice(0, batchSize);
+    return results.flat().splice(0, MAXIMUM_RETURN);
   }
 
   static async createUsers(data, sessionId) {
@@ -47,6 +48,7 @@ class User extends Model {
   static async listAll({ query, sessionId }) {
     try {
       const rows = await User.scope(
+        { method: ['default'] },
         { method: ['bySession', sessionId] },
         { method: ['findByQuery', query] }
       ).findAll();
@@ -69,6 +71,11 @@ User.init(
     sequelize,
     modelName: 'User',
     scopes: {
+      default: () => {
+        return {
+          limit: MAXIMUM_RETURN,
+        }
+      },
       bySession: (sessionId) => {
         return { where: { session_id: sessionId } }
       },
