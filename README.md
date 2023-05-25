@@ -1,6 +1,8 @@
 # General Info
 This project uses sequelize as ORM and also uses a Postgres database
 ### `make sure you have postgres on your machine`
+### `the database config can be found under the path /database/config.json`
+### `CHANGE YOUR POSTGRES USER AND PASSWORD IF NEEDED`
 
 ## Running the project
 ### run the following commands in the given order
