@@ -27,6 +27,7 @@ describe('File Controller - Suite Tests', () => {
     res = { send: sinon.stub() };
     next = sinon.stub()
   })
+  
   afterEach(() => {
     sinon.restore();
   });

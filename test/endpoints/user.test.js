@@ -12,7 +12,6 @@ const ENDPOINT = '/api/users/'
 
 describe('/GET USERS', () => {
   it('Should reach the API and return an exception for missing session_id', done => {
-
     chai.request(server)
       .get(ENDPOINT)
       .end((err, res) => {
