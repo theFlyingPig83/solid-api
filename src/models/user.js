@@ -86,16 +86,16 @@ User.init(
             where: {
               [Op.or]: {
                 name: {
-                  [Op.like]: `%${query}%`,
+                  [Op.iLike]: `%${query}%`,
                 },
                 city: {
-                  [Op.like]: `%${query}%`,
+                  [Op.iLike]: `%${query}%`,
                 },
                 country: {
-                  [Op.like]: `%${query}%`,
+                  [Op.iLike]: `%${query}%`,
                 },
                 favorite_sport: {
-                  [Op.like]: `%${query}%`,
+                  [Op.iLike]: `%${query}%`,
                 },
               },
             },
