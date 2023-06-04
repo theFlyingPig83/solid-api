@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "fb51093b-d49a-4527-bc5e-442ca5ea24fd",
-		"name": "Back-End Challenge",
+		"name": "SOLID API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "24610551"
 	},
@@ -23,7 +23,7 @@
 						{
 							"key": "file",
 							"type": "file",
-							"src": "/C:/Desenvolvimento/Estudos/JobGringa/Desafios Técnicos/SHAWANDPARTNERS/fullstack/back-end-challenge/test/mocks/valid.csv"
+							"src": "/valid.csv"
 						}
 					]
 				},
