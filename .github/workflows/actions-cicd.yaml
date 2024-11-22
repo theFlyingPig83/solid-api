@@ -1,0 +1,141 @@
+name: CI/CD Pipeline for Node.js API with SonarQube
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ${{ secrets.DB_USER }}" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Set Database Environment Variables
+        run: |
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
+          echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+          echo "DB_PORT=5432" >> $GITHUB_ENV
+
+      - name: Run Database Setup
+        run: |
+          npm run prod:db:create
+          npm run prod:db:migrate
+          npm run prod:db:seed
+
+      - name: Run Tests
+        run: npm run test
+
+      - name: Generate Test Coverage Report
+        run: |
+          npm run test:cov
+          mv coverage/lcov.info coverage/coverage.lcov
+
+      - name: Code Quality Analysis with SonarQube
+        uses: sonarsource/sonarqube-scan-action@v1
+        env: 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
+        with:
+          args: >
+            -Dsonar.projectKey=nodejs_api_project
+            -Dsonar.projectName="Node.js API Project"
+            -Dsonar.sources=.
+            -Dsonar.language=js
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.javascript.lcov.reportPaths=coverage/coverage.lcov
+
+      - name: Wait for SonarQube Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@v1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
+
+      - name: OWASP Dependency-Check
+        uses: dependency-check/action@v1
+        with:
+          format: 'HTML'
+          outputDirectory: './dependency-check-report'
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: |
+          IMAGE_TAG=ghcr.io/${{ github.repository }}/node-api:${{ github.sha }}
+          docker build -t $IMAGE_TAG .
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Scan Docker Image with Trivy
+        uses: aquasecurity/trivy-action@v0.2.0
+        with:
+          image-ref: $IMAGE_TAG
+          format: 'json'
+          output: 'trivy-reports/scan_report.json'
+
+      - name: Push Docker Image to GitHub Container Registry
+        run: |
+          docker push $IMAGE_TAG
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker-build
+
+    steps:
+      - name: Set up K3s kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+
+      - name: Update Deployment Manifests with Image Tag
+        run: |
+          sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
+
+      - name: Deploy to K3s Kubernetes Cluster
+        run: |
+          kubectl apply -f k3s-deployment.yaml
