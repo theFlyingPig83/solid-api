@@ -83,10 +83,11 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
 
       - name: OWASP Dependency-Check
-        uses: dependency-check/action@v1
+        uses: jeremylong/dependency-check-action@v2.0.7
         with:
           format: 'HTML'
           outputDirectory: './dependency-check-report'
+
 
   docker-build:
     runs-on: ubuntu-latest
