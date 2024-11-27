@@ -17,9 +17,9 @@ jobs:
       db:
         image: postgres:13-alpine
         env:
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_USER: db-user-placeholder
+          POSTGRES_PASSWORD: db-password-placeholder
+          POSTGRES_DB: db-name-placeholder
         ports:
           - 5432:5432
         options: >-
