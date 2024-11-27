@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon server.js",
     "test": "mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
-    "test:cov": "nyc mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
+    "test:cov": "nyc --reporter=lcov --reporter=text mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
     "dev:db:create": "npx sequelize-cli --env dev db:create",
     "dev:db:drop": "npx sequelize-cli --env dev db:drop",
     "dev:db:migrate": "npx sequelize-cli --env dev db:migrate",
@@ -49,6 +49,7 @@
   "nyc": {
     "include": ["./src/**/*.js"],
     "reporter": ["lcov", "text-summary"],
+    "report-dir": "./coverage",
     "check-coverage": false,
     "branches": 40,
     "functions": 50,
