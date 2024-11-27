@@ -14,7 +14,7 @@
     "prod:db:drop": "npx sequelize-cli --env prod db:drop",
     "prod:db:migrate": "npx sequelize-cli --env prod db:migrate",
     "prod:db:seed": "npx sequelize-cli --env prod db:seed"
-  },  
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/GRenkel/back-end-challenge.git"
@@ -38,12 +38,12 @@
     "nyc": "^15.1.0",
     "pg": "^8.11.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.31.1",
+    "sequelize": "^6.37.5",
     "sinon": "^15.1.0",
     "stub": "^0.3.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22",
-    "sequelize-cli": "^6.6.0"
+    "nodemon": "^3.1.7",
+    "sequelize-cli": "^6.6.2"
   }
 }
