@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Stage 2: Production Stage
-FROM node:18-alpine
+FROM gcr.io/distroless/nodejs18
 
 # Set the working directory
 WORKDIR /app

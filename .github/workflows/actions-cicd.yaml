@@ -27,10 +27,21 @@ jobs:
           --health-interval 10s 
           --health-timeout 5s 
           --health-retries 5
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ github.ref }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ github.ref }}-
+            ${{ runner.os }}-node-
+
+      - name: Record Start Time
+        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -75,6 +86,13 @@ jobs:
             -Dsonar.language=js
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.javascript.lcov.reportPaths=coverage/coverage.lcov
+            -Dsonar.branch.name=${{ github.head_ref }}
+
+      - name: Upload SonarQube Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: sonarqube-coverage-report
+          path: './coverage/coverage.lcov'
 
       - name: Wait for SonarQube Quality Gate
         uses: sonarsource/sonarqube-quality-gate-action@v1
@@ -82,23 +100,64 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
 
-      - name: OWASP Dependency-Check
-        uses: jeremylong/dependency-check-action@v2.0.7
-        with:
-          format: 'HTML'
-          outputDirectory: './dependency-check-report'
+      - name: Install jq
+        run: sudo apt-get install -y jq
 
+      - name: Dependency Scan with Trivy
+        uses: aquasecurity/trivy-action@v0.2.0
+        with:
+          scan-type: 'fs'
+          format: 'json'
+          output: './trivy-reports/trivy-dependency-check.json'
+
+      - name: Extract Trivy Vulnerability Counts
+        run: |
+          CRITICAL_COUNT=$(jq '.Results[].Vulnerabilities | map(select(.Severity == "CRITICAL")) | length' trivy-reports/trivy-dependency-check.json | jq -s 'add')
+          HIGH_COUNT=$(jq '.Results[].Vulnerabilities | map(select(.Severity == "HIGH")) | length' trivy-reports/trivy-dependency-check.json | jq -s 'add')
+          echo "Critical Vulnerabilities: $CRITICAL_COUNT" >> pipeline_metrics_${{ github.run_id }}.log
+          echo "High Vulnerabilities: $HIGH_COUNT" >> pipeline_metrics_${{ github.run_id }}.log
+
+      - name: Upload Trivy Dependency Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-dependency-check-report
+          path: './trivy-reports/trivy-dependency-check.json'
+
+      - name: Record End Time and Log Build Time
+        run: |
+          END_TIME=$(date +%s)
+          BUILD_DURATION=$((END_TIME - START_TIME))
+          LOG_FILE="pipeline_metrics_${{ github.run_id }}.log"
+          echo "Build and Test completed in $BUILD_DURATION seconds" >> $LOG_FILE
+          echo "LOG_FILE=$LOG_FILE" >> $GITHUB_ENV
+
+      - name: Upload Build Metrics Log
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-metrics-log
+          path: ${{ env.LOG_FILE }}
 
   docker-build:
     runs-on: ubuntu-latest
     needs: build-and-test
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Record Start Time
+        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: Cache Docker Layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ github.ref }}-
+            ${{ runner.os }}-buildx-
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
@@ -110,7 +169,7 @@ jobs:
       - name: Build Docker Image
         run: |
           IMAGE_TAG=ghcr.io/${{ github.repository }}/node-api:${{ github.sha }}
-          docker build -t $IMAGE_TAG .
+          docker build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache -t $IMAGE_TAG .
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Scan Docker Image with Trivy
@@ -118,17 +177,48 @@ jobs:
         with:
           image-ref: $IMAGE_TAG
           format: 'json'
-          output: 'trivy-reports/scan_report.json'
+          output: 'trivy-reports/docker_scan_report.json'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Fail if Vulnerabilities Found
+        run: |
+          if [ -s trivy-reports/docker_scan_report.json ]; then
+            echo "Critical vulnerabilities found. Failing the pipeline."
+            exit 1
+          fi
+
+      - name: Upload Trivy Docker Image Scan Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-docker-image-scan-report
+          path: './trivy-reports/docker_scan_report.json'
 
       - name: Push Docker Image to GitHub Container Registry
         run: |
           docker push $IMAGE_TAG
 
+      - name: Record End Time and Log Docker Build Time
+        run: |
+          END_TIME=$(date +%s)
+          DOCKER_BUILD_DURATION=$((END_TIME - START_TIME))
+          LOG_FILE="pipeline_metrics_${{ github.run_id }}.log"
+          echo "Docker Build completed in $DOCKER_BUILD_DURATION seconds" >> $LOG_FILE
+          echo "LOG_FILE=$LOG_FILE" >> $GITHUB_ENV
+
+      - name: Upload Docker Build Metrics Log
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-build-metrics-log
+          path: ${{ env.LOG_FILE }}
+
   deploy:
     runs-on: ubuntu-latest
     needs: docker-build
-
     steps:
+      - name: Record Start Time
+        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+
       - name: Create Namespace if Not Exists
         run: |
           kubectl get namespace solid-api-2024 || kubectl create namespace solid-api-2024
@@ -145,3 +235,17 @@ jobs:
       - name: Deploy to K3s Kubernetes Cluster
         run: |
           kubectl apply -f k3s-deployment.yaml
+
+      - name: Record End Time and Log Deploy Time
+        run: |
+          END_TIME=$(date +%s)
+          DEPLOY_DURATION=$((END_TIME - START_TIME))
+          LOG_FILE="pipeline_metrics_${{ github.run_id }}.log"
+          echo "Deployment completed in $DEPLOY_DURATION seconds" >> $LOG_FILE
+          echo "LOG_FILE=$LOG_FILE" >> $GITHUB_ENV
+
+      - name: Upload Deploy Metrics Log
+        uses: actions/upload-artifact@v3
+        with:
+          name: deploy-metrics-log
+          path: ${{ env.LOG_FILE }}
