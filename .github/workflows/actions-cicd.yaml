@@ -18,8 +18,8 @@ jobs:
         image: postgres:13-alpine
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: db-password-placeholder
-          POSTGRES_DB: db-name-placeholder
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fullstack-challenge-prod
         ports:
           - 5432:5432
         options: >-
