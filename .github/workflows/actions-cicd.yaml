@@ -61,9 +61,9 @@ jobs:
 
       - name: Run Database Setup
         run: |
-          npm run prod:db:create
-          npm run prod:db:migrate
-          npm run prod:db:seed
+          npm run dev:db:create
+          npm run dev:db:migrate
+          npm run dev:db:seed
 
       - name: Run Tests
         run: npm run test
