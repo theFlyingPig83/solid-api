@@ -104,7 +104,7 @@ jobs:
         run: sudo apt-get install -y jq
 
       - name: Dependency Scan with Trivy
-        uses: aquasecurity/trivy-action@v0.2.0
+        uses: aquasecurity/trivy-action@latest
         with:
           scan-type: 'fs'
           format: 'json'
