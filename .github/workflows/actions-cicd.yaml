@@ -17,13 +17,13 @@ jobs:
       db:
         image: postgres:13-alpine
         env:
-          POSTGRES_USER: db-user-placeholder
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: db-password-placeholder
           POSTGRES_DB: db-name-placeholder
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U ${{ secrets.DB_USER }}" 
+          --health-cmd "pg_isready -U postgres" 
           --health-interval 10s 
           --health-timeout 5s 
           --health-retries 5
