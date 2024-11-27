@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - hcs522-devops-pipeline
   pull_request:
     branches:
       - main
@@ -127,6 +128,10 @@ jobs:
     needs: docker-build
 
     steps:
+      - name: Create Namespace if Not Exists
+        run: |
+          kubectl get namespace solid-api-2024 || kubectl create namespace solid-api-2024
+
       - name: Set up K3s kubeconfig
         run: |
           mkdir -p ~/.kube

@@ -63,11 +63,10 @@ scp -i id_xxx root@<master_node_ip>:/etc/rancher/k3s/k3s.yaml ~/.kube/config
 
 ```
 
-	- Note: Make sure your local directory ~/.kube/ exists AND edit the config file to use remote master node IP. 
+Note: Make sure your local directory ~/.kube/ exists AND edit the config file to use remote master node IP. 
 
 2. Update Kubeconfig Permissions:
 	- Update the permissions to secure the kubeconfig file:
-	- 
 ```
 chmod 600 ~/.kube/config
 
@@ -81,4 +80,4 @@ kubectl get nodes
 
 ```
 
-	- We should see both the master and worker nodes listed locally.
+We should see both the master and worker nodes listed locally!

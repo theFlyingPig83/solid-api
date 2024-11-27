@@ -145,12 +145,12 @@ kubectl get pods -n postgres
 kubectl get svc -n postgres
 ```
 
-	- We should see a ClusterIP service named postgres listening on port 5432.
+We should see a ClusterIP service named postgres listening on port 5432.
 
 
 Step 6: Update Application to Use PostgreSQL
 
-Now that PostgreSQL is running in the cluster, we need to update the testbed application's configuration to connect to this database: (in database/config.json)(here aligns with industry best practice)
+Now that PostgreSQL is running in the cluster, we need to update the testbed application's configuration to connect to this database: (in database/config.json)(here it aligns with industry best practice)
 
 ```
 {
