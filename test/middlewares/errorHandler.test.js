@@ -1,3 +1,5 @@
+// test/middlewares/errorHandler.test.js
+
 'use strict';
 
 const chai = require('chai');
@@ -8,7 +10,14 @@ const HttpStatusCode = require('../../src/constants/HttpStatusCode');
 const ServerErrors = require('../../src/constants/ServerErrors');
 
 describe('errorHandler - Suite Test', () => {
+  beforeEach(() => {
+    // Stub console.error to suppress error logs during testing
+    sinon.stub(console, 'error');
+  });
+
   afterEach(() => {
+    // Restore console.error after each test
+    console.error.restore();
     sinon.restore();
   });
 
@@ -21,19 +30,15 @@ describe('errorHandler - Suite Test', () => {
     const err = new Error('An unexpected error occurred');
     const next = sinon.stub();
 
-    // Wrap the call in a try-catch to catch any unexpected exceptions
-    try {
-      errorHandler(err, req, res, next);
-    } catch (e) {
-      // If errorHandler throws an error, the test should fail
-      expect.fail(`errorHandler threw an unexpected error: ${e.message}`);
-    }
+    errorHandler(err, req, res, next);
 
     expect(res.status.calledOnceWith(HttpStatusCode.INTERNAL_ERROR)).to.be.true;
-    expect(res.json.calledOnceWith({
-      error: ServerErrors.INTERNAL_ERROR_MESSAGE,
-      uiMessage: ServerErrors.INTERNAL_ERROR_UI_MESSAGE,
-    })).to.be.true;
+    expect(
+      res.json.calledOnceWith({
+        error: ServerErrors.INTERNAL_ERROR_MESSAGE,
+        uiMessage: ServerErrors.INTERNAL_ERROR_UI_MESSAGE,
+      })
+    ).to.be.true;
     expect(next.notCalled).to.be.true;
   });
 
@@ -50,19 +55,15 @@ describe('errorHandler - Suite Test', () => {
     };
     const next = sinon.stub();
 
-    // Wrap the call in a try-catch to catch any unexpected exceptions
-    try {
-      errorHandler(err, req, res, next);
-    } catch (e) {
-      // If errorHandler throws an error, the test should fail
-      expect.fail(`errorHandler threw an unexpected error: ${e.message}`);
-    }
+    errorHandler(err, req, res, next);
 
     expect(res.status.calledOnceWith(err.httpStatus)).to.be.true;
-    expect(res.json.calledOnceWith({
-      error: err.message,
-      uiMessage: err.uiMessage,
-    })).to.be.true;
+    expect(
+      res.json.calledOnceWith({
+        error: err.message,
+        uiMessage: err.uiMessage,
+      })
+    ).to.be.true;
     expect(next.notCalled).to.be.true;
   });
 });
