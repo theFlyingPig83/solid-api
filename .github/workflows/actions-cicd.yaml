@@ -222,20 +222,17 @@ jobs:
 
       - name: Create Namespace if Not Exists
         run: |
-          kubectl get namespace solid-api-2024 || kubectl create namespace solid-api-2024
-
-      - name: Set up K3s kubeconfig
-        run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > ~/.kube/config
+          kubectl config use-context digitalocean-k3s-context
+          kubectl get namespace solid-api-2024 || kubectl create namespace solid-api-2024
 
       - name: Update Deployment Manifests with Image Tag
         run: |
           sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
 
       - name: Deploy to K3s Kubernetes Cluster
-        run: |
-          kubectl apply -f k3s-deployment.yaml
+        run: kubectl apply -f k3s-deployment.yaml
 
       - name: Record End Time and Log Deploy Time
         run: |
@@ -246,7 +243,7 @@ jobs:
           echo "LOG_FILE=$LOG_FILE" >> $GITHUB_ENV
 
       - name: Upload Deploy Metrics Log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: deploy-metrics-log
           path: ${{ env.LOG_FILE }}
