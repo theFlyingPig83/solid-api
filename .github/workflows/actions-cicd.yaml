@@ -92,11 +92,21 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
 
-      - name: Install jq
-        run: sudo apt-get install -y jq
+      - name: Install jq if not already installed
+        run: |
+          if ! command -v jq &> /dev/null
+          then
+            echo "jq is not installed. Installing jq..."
+            sudo apt-get update && sudo apt-get install -y jq
+          else
+            echo "jq is already installed."
+          fi
+
+      - name: Create Directory for Trivy Reports
+        run: mkdir -p ./trivy-reports
 
       - name: Dependency Scan with Trivy
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@v0.29.0
         with:
           scan-type: 'fs'
           format: 'json'
@@ -104,8 +114,8 @@ jobs:
 
       - name: Extract Trivy Vulnerability Counts
         run: |
-          CRITICAL_COUNT=$(jq '.Results[].Vulnerabilities | map(select(.Severity == "CRITICAL")) | length' trivy-reports/trivy-dependency-check.json | jq -s 'add')
-          HIGH_COUNT=$(jq '.Results[].Vulnerabilities | map(select(.Severity == "HIGH")) | length' trivy-reports/trivy-dependency-check.json | jq -s 'add')
+          CRITICAL_COUNT=$(jq '.Results[].Vulnerabilities | map(select(.Severity == "CRITICAL")) | length' ./trivy-reports/trivy-dependency-check.json | jq -s 'add')
+          HIGH_COUNT=$(jq '.Results[].Vulnerabilities | map(select(.Severity == "HIGH")) | length' ./trivy-reports/trivy-dependency-check.json | jq -s 'add')
           echo "Critical Vulnerabilities: $CRITICAL_COUNT" >> pipeline_metrics_${{ github.run_id }}.log
           echo "High Vulnerabilities: $HIGH_COUNT" >> pipeline_metrics_${{ github.run_id }}.log
 
