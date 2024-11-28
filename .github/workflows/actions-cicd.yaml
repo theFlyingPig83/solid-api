@@ -82,12 +82,14 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=nodejs_api_project
-            -Dsonar.projectName="Node.js API Project"
+            -Dsonar.projectName='Node.js API Project'
             -Dsonar.sources=.
             -Dsonar.language=js
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.javascript.lcov.reportPaths=coverage/coverage.lcov
-            -Dsonar.branch.name=${{ github.head_ref }}
+            -Dsonar.branch.name=${{ github.head_ref || github.ref_name }}
+            -Dsonar.verbose=true
+            -X
 
       - name: Upload SonarQube Coverage Report
         uses: actions/upload-artifact@v3
