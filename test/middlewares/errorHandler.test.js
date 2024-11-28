@@ -3,11 +3,11 @@
 const chai = require('chai');
 const sinon = require('sinon');
 const { expect } = chai;
-const {errorHandler} = require('../../src/middlewares/errorHandler');
+const { errorHandler } = require('../../src/middlewares/errorHandler');
 const HttpStatusCode = require('../../src/constants/HttpStatusCode');
 const ServerErrors = require('../../src/constants/ServerErrors');
 
-describe('errorHandler - Suit Test', () => {
+describe('errorHandler - Suite Test', () => {
   afterEach(() => {
     sinon.restore();
   });
@@ -21,7 +21,13 @@ describe('errorHandler - Suit Test', () => {
     const err = new Error('An unexpected error occurred');
     const next = sinon.stub();
 
-    errorHandler(err, req, res, next);
+    // Wrap the call in a try-catch to catch any unexpected exceptions
+    try {
+      errorHandler(err, req, res, next);
+    } catch (e) {
+      // If errorHandler throws an error, the test should fail
+      expect.fail(`errorHandler threw an unexpected error: ${e.message}`);
+    }
 
     expect(res.status.calledOnceWith(HttpStatusCode.INTERNAL_ERROR)).to.be.true;
     expect(res.json.calledOnceWith({
@@ -44,7 +50,13 @@ describe('errorHandler - Suit Test', () => {
     };
     const next = sinon.stub();
 
-    errorHandler(err, req, res, next);
+    // Wrap the call in a try-catch to catch any unexpected exceptions
+    try {
+      errorHandler(err, req, res, next);
+    } catch (e) {
+      // If errorHandler throws an error, the test should fail
+      expect.fail(`errorHandler threw an unexpected error: ${e.message}`);
+    }
 
     expect(res.status.calledOnceWith(err.httpStatus)).to.be.true;
     expect(res.json.calledOnceWith({
