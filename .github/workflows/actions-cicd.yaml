@@ -228,8 +228,11 @@ jobs:
           kubectl get namespace solid-api-2024 || kubectl create namespace solid-api-2024
 
       - name: Update Deployment Manifests with Image Tag
+        working-directory: ${{ github.workspace }}
         run: |
+          ls -al # Debugging to ensure the file is present
           sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
+
 
       - name: Deploy to K3s Kubernetes Cluster
         run: kubectl apply -f k3s-deployment.yaml
