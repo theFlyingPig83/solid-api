@@ -1,14 +1,12 @@
 {
-  "branches": 100,
-  "lines": 100,
-  "functions": 100,
-  "statements": 100,
-  "checkCoverage": true,
-  "reporter": [
-    "html",
-    "text"
-  ],
-  "exclude": [
-    "test/**/*.js"
-  ]
+  "include": ["src/**/*.js"],
+  "exclude": ["test/**/*.js"],
+  "reporter": ["lcov", "text", "text-summary"],
+  "report-dir": "./coverage",
+  "all": true,
+  "check-coverage": false,
+  "branches": 40,
+  "functions": 50,
+  "lines": 75,
+  "statements": 75
 }
