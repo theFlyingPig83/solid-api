@@ -170,6 +170,9 @@ jobs:
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+      - name: Create Directory for Trivy Reports
+        run: mkdir -p ./trivy-reports
+
       - name: Scan Docker Image with Trivy
         uses: aquasecurity/trivy-action@0.29.0
         with:
