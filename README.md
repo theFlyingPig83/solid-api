@@ -1,3 +1,4 @@
+(This is a backup branch of the original 'main' branch right before the DevOps project started.)
 # Application of SOLID Principles in a Node.js API
 
 This project demonstrates the application of SOLID principles in a Node.js API.
