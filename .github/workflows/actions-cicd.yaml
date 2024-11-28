@@ -164,7 +164,8 @@ jobs:
 
       - name: Build Docker Image with Cache
         run: |
-          IMAGE_TAG=ghcr.io/${{ github.repository }}/node-api:${{ github.sha }}
+          LOWERCASE_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_TAG=ghcr.io/$LOWERCASE_REPO/node-api:${{ github.sha }}
           docker build --build-arg BUILDKIT_INLINE_CACHE=1 -t $IMAGE_TAG .
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
