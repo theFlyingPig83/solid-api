@@ -5,7 +5,7 @@ Step 1: Create a Namespace for PostgreSQL
 First, create a dedicated namespace for PostgreSQL to keep it isolated and organized:
 
 ```
-kubectl create namespace postgres
+kubectl create namespace solid-api-2024
 
 ```
 
@@ -20,7 +20,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
-  namespace: postgres
+  namespace: solid-api-2024
 spec:
   accessModes:
     - ReadWriteOnce
@@ -46,7 +46,7 @@ kubectl create secret generic postgres-credentials \
   --from-literal=username=postgres \
   --from-literal=password=postgres \
   --from-literal=database=fullstack-challenge-prod \
-  -n postgres
+  -n solid-api-2024
 
 ```
 
@@ -57,7 +57,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: postgres
+  namespace: solid-api-2024
   labels:
     app: postgres
 spec:
@@ -116,7 +116,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres
-  namespace: postgres
+  namespace: solid-api-2024
 spec:
   type: ClusterIP
   ports:
@@ -137,12 +137,12 @@ Step 5: Verify the Setup
 1. Check the Pods:
 	- Verify that the PostgreSQL pod is running:
 ```
-kubectl get pods -n postgres
+kubectl get pods -n solid-api-2024
 ```
 2. Check the service:
 	- Verify that the PostgreSQL service is up:
 ```
-kubectl get svc -n postgres
+kubectl get svc -n solid-api-2024
 ```
 
 We should see a ClusterIP service named postgres listening on port 5432.
