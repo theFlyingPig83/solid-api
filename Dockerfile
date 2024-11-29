@@ -19,11 +19,20 @@ FROM node:18-alpine
 # Set the working directory inside the container
 WORKDIR /app
 
+# Create a non-root user and group
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Set permissions for the application directory
+RUN chown -R appuser:appgroup /app
+
+# Switch to the non-root user
+USER appuser
+
 # Copy only the necessary files from the builder stage
 COPY --from=builder /app .
 
 # Expose the application port
 EXPOSE 5050
 
-# Start the application using node (bypassing nodemon for production)
+# Start the application using node
 CMD ["node", "server.js"]

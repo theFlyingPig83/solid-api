@@ -247,7 +247,7 @@ jobs:
           echo "LOG_FILE=$LOG_FILE" >> $GITHUB_ENV
 
       - name: Upload Deploy Metrics Log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: deploy-metrics-log
           path: ${{ env.LOG_FILE }}
