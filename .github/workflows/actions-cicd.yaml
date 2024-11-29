@@ -217,6 +217,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker-build
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Record Start Time
         run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
 
@@ -230,9 +233,7 @@ jobs:
       - name: Update Deployment Manifests with Image Tag
         working-directory: ${{ github.workspace }}
         run: |
-          ls -al # Debugging to ensure the file is present
           sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
-
 
       - name: Deploy to K3s Kubernetes Cluster
         run: kubectl apply -f k3s-deployment.yaml
