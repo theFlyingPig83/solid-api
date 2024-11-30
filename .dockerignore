@@ -1,14 +1,11 @@
+# Node.js dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
 # Logs
 logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-
-# Diagnostic reports
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Runtime data
 pids
@@ -16,59 +13,9 @@ pids
 *.seed
 *.pid.lock
 
-# Coverage and test artifacts
-lib-cov
+# Source maps
+*.map
+
+# Testing
 coverage
-*.lcov
 .nyc_output
-test/
-
-# Dependency directories
-node_modules/
-bower_components
-jspm_packages/
-web_modules/
-
-# Build artifacts
-build/Release
-dist/
-.next
-out
-.nuxt
-.vuepress/dist
-
-# Cache and temporary files
-.npm
-.cache/
-.parcel-cache
-.temp
-.docusaurus
-.rpt2_cache/
-.rts2_cache_*/
-
-# Configuration and environment files
-.env
-.env.*.local
-
-# Optional files
-.eslintcache
-.stylelintcache
-.node_repl_history
-*.tsbuildinfo
-.yarn-integrity
-
-# Yarn v2 files
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.*
-
-# Serverless directories
-.serverless/
-
-# Other framework-specific files
-.dynamodb/
-.fusebox/
-.tern-port
-.vscode-test

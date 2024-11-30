@@ -1,31 +1,32 @@
 # Stage 1: Build Stage
-FROM node:18-bullseye-slim AS builder
+FROM node:18-alpine AS builder
 
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm ci --production --omit=dev && \
-    npm cache clean --force && \
-    rm -rf /tmp/* /usr/share/man /usr/share/doc /var/cache/* /var/lib/apt/lists/*
+# Install dependencies, including only production dependencies
+RUN npm ci --omit=dev
 
-# Copy all application files
+# Copy the rest of the application code
 COPY . .
 
 # Stage 2: Production Stage
-FROM node:18-bullseye-slim
+FROM node:18-alpine
 
+# Set the working directory inside the container
 WORKDIR /app
 
-# Create a non-root user and set ownership
-RUN groupadd -r appgroup && \
-    useradd -r -g appgroup -d /app -s /sbin/nologin appuser && \
-    chown -R appuser:appgroup /app
-
-# Copy application files from the builder stage
+# Copy only the necessary files from the builder stage
 COPY --from=builder /app .
+
+# Set the environment to production
+ENV NODE_ENV=production
+
+# Create a non-root user and group and set up permissions
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown -R appuser:appgroup /app
 
 # Switch to the non-root user
 USER appuser
@@ -33,5 +34,5 @@ USER appuser
 # Expose the application port
 EXPOSE 5050
 
-# Start the application
+# Start the application using node
 CMD ["node", "server.js"]
