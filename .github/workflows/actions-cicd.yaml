@@ -52,7 +52,6 @@ jobs:
         run: |
           npm ci --omit=dev
           npm dedupe
-          npm audit fix --force
 
       - name: Set Database Environment Variables
         run: |
