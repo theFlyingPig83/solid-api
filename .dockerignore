@@ -1,0 +1,11 @@
+node_modules
+test
+coverage
+PostmanCollection
+Infrastructure
+*.log
+*.md
+*.csv
+.dockerignore
+.git
+.gitignore
