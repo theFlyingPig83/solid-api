@@ -79,9 +79,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
-        with:
-          args: >
-            -Dsonar.branch.name=${{ github.ref_name }}
 
       - name: Upload SonarQube Coverage Report
         uses: actions/upload-artifact@v4
