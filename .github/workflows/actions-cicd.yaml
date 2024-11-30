@@ -49,7 +49,10 @@ jobs:
           node-version: 18
 
       - name: Install Dependencies
-        run: npm install
+        run: |
+          npm ci --omit=dev
+          npm dedupe
+          npm audit fix --force
 
       - name: Set Database Environment Variables
         run: |
@@ -64,7 +67,7 @@ jobs:
           npm run dev:db:drop
           npm run dev:db:create
           npm run dev:db:migrate
-          # npm run prod:db:seed
+          #(extra for prod) npm run prod:db:seed
 
       - name: Run Tests
         run: npm run test
@@ -188,12 +191,12 @@ jobs:
           name: trivy-docker-image-scan-report
           path: './trivy-reports/docker_scan_report.json'
 
-      # - name: Fail if Vulnerabilities Found
-      #   run: |
-      #     if [ -s trivy-reports/docker_scan_report.json ]; then
-      #       echo "Critical vulnerabilities found. Failing the pipeline."
-      #       exit 1
-      #     fi
+      - name: Fail if Vulnerabilities Found
+        run: |
+          if [ -s trivy-reports/docker_scan_report.json ]; then
+            echo "Critical vulnerabilities found. Failing the pipeline."
+            exit 1
+          fi
 
       - name: Push Docker Image to GitHub Container Registry
         run: |
