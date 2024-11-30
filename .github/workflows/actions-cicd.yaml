@@ -76,9 +76,12 @@ jobs:
 
       - name: Code Quality Analysis with SonarQube
         uses: sonarsource/sonarqube-scan-action@v1
-        env: 
+        env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
+        with:
+          args: >
+            -Dsonar.branch.name=${{ github.ref_name }}
 
       - name: Upload SonarQube Coverage Report
         uses: actions/upload-artifact@v4
