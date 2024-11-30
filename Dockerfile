@@ -1,5 +1,4 @@
 # Stage 1: Build Stage
-
 FROM node:18-alpine AS builder
 
 # Update npm and set working directory
@@ -20,7 +19,6 @@ COPY server.js src/ database/ .sequelizerc ./
 
 
 # Stage 2: Production Stage
-
 FROM node:18-alpine
 
 # Update npm and set working directory
@@ -45,6 +43,4 @@ USER hcs522
 
 # Expose port and start application
 EXPOSE 5050
-
-# Start the application using node
 CMD ["node", "server.js"]
