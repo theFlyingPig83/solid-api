@@ -50,6 +50,6 @@
     "sequelize-cli": "^6.6.2"
   },
   "resolutions": {
-    "cross-spawn": "^7.0.6"
-  }
+    "cross-spawn": "7.0.6"
+  }  
 }
