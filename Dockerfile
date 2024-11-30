@@ -14,19 +14,10 @@ RUN npm install --production
 COPY . .
 
 # Stage 2: Production Stage
-FROM node:18-alpine
+FROM gcr.io/distroless/nodejs18:nonroot
 
 # Set the working directory inside the container
 WORKDIR /app
-
-# Create a non-root user and group
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# Set permissions for the application directory
-RUN chown -R appuser:appgroup /app
-
-# Switch to the non-root user
-USER appuser
 
 # Copy only the necessary files from the builder stage
 COPY --from=builder /app .
@@ -35,4 +26,4 @@ COPY --from=builder /app .
 EXPOSE 5050
 
 # Start the application using node
-CMD ["node", "server.js"]
+CMD ["server.js"]
