@@ -9,7 +9,7 @@ COPY package*.json ./
 # Install only production dependencies
 RUN npm ci --production --omit=dev && \
     npm cache clean --force && \
-    rm -rf /tmp/* /usr/share/man /usr/share/doc
+    rm -rf /tmp/* /usr/share/man /usr/share/doc /var/cache/* /var/lib/apt/lists/*
 
 # Copy all application files
 COPY . .
@@ -19,7 +19,7 @@ FROM node:18-bullseye-slim
 
 WORKDIR /app
 
-# Create a non-root user
+# Create a non-root user and set ownership
 RUN groupadd -r appgroup && \
     useradd -r -g appgroup -d /app -s /sbin/nologin appuser && \
     chown -R appuser:appgroup /app
