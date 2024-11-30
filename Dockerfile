@@ -1,5 +1,5 @@
 # Stage 1: Build Stage
-FROM node:18-alpine AS builder
+FROM node:18-bullseye-slim AS builder
 
 WORKDIR /app
 
@@ -13,17 +13,17 @@ RUN npm ci --production
 COPY . .
 
 # Stage 2: Production Stage
-FROM node:18-alpine
+FROM node:18-bullseye-slim
 
 WORKDIR /app
 
+# Create a non-root user and set permissions
+RUN groupadd -r appgroup && \
+    useradd -r -g appgroup -d /app -s /sbin/nologin appuser && \
+    chown -R appuser:appgroup /app
+
 # Copy application files from the builder stage
 COPY --from=builder /app .
-
-# Create a non-root user and set permissions
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
-    mkdir -p /app && \
-    chown -R appuser:appgroup /app
 
 # Switch to the non-root user
 USER appuser
