@@ -6,8 +6,10 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install only production dependencies using npm ci
-RUN npm ci --production
+# Install only production dependencies
+RUN npm ci --production --omit=dev && \
+    npm cache clean --force && \
+    rm -rf /tmp/* /usr/share/man /usr/share/doc
 
 # Copy all application files
 COPY . .
@@ -17,7 +19,7 @@ FROM node:18-bullseye-slim
 
 WORKDIR /app
 
-# Create a non-root user and set permissions
+# Create a non-root user
 RUN groupadd -r appgroup && \
     useradd -r -g appgroup -d /app -s /sbin/nologin appuser && \
     chown -R appuser:appgroup /app
