@@ -7,6 +7,11 @@ metadata:
     app: node-api
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
   selector:
     matchLabels:
       app: node-api
@@ -22,6 +27,13 @@ spec:
           image: ghcr.io/theflyingpig83/solid-api/node-api:<IMAGE_TAG>
           ports:
             - containerPort: 5050
+          resources:
+            requests:
+              memory: "250Mi"   
+              cpu: "200m"      
+            limits:
+              memory: "300Mi"  
+              cpu: "400m"     
           env:
           - name: DB_HOST
             value: "postgres.solid-api-2024.svc.cluster.local"
