@@ -16,6 +16,26 @@ pids
 # Source maps
 *.map
 
-# Testing
+# Testing directories and files
 coverage
 .nyc_output
+test/
+
+# Build and configuration files 
+.DS_Store
+.git/
+.gitignore
+.dockerignore
+Dockerfile
+k3s-deployment.yaml
+README.md
+sonar-project.properties
+.nycrc.json
+
+# Environment files
+.env
+.env.*.local
+
+# Optional cache directories
+.cache
+.parcel-cache
