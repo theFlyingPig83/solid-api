@@ -1,10 +1,13 @@
 # Stage 1: Build Stage
 FROM node:18-alpine AS builder
 
+# Update npm to the latest version
+RUN npm install -g npm@latest
+
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies, including only production dependencies
@@ -19,6 +22,9 @@ COPY . .
 # Stage 2: Production Stage
 FROM node:18-alpine
 
+# Update npm to the latest version
+RUN npm install -g npm@latest
+
 # Set the working directory inside the container
 WORKDIR /app
 
@@ -29,7 +35,8 @@ COPY --from=builder /app .
 ENV NODE_ENV=production
 
 # Create a non-root user and group and set up permissions
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown -R appuser:appgroup /app
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
+    chown -R appuser:appgroup /app
 
 # Switch to the non-root user
 USER appuser
