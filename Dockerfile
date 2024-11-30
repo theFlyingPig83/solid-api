@@ -1,11 +1,11 @@
-# Use the latest Node.js LTS version with Alpine Linux
+# Build Stage: Use the latest Node.js LTS version with Alpine Linux
 FROM node:18-alpine AS builder
+
+# Update npm to the latest version
+RUN npm install -g npm@latest
 
 # Set the working directory
 WORKDIR /app
-
-# Debug: Check if /app was created by WORKDIR
-RUN ls -la /app || echo "/app does not exist yet"
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
@@ -16,8 +16,12 @@ RUN npm ci --omit=dev && npm cache clean --force
 # Copy the necessary application files
 COPY server.js src/ database/ .sequelizerc ./
 
-# Use a minimal Node.js runtime for the final image
+
+# Prod Stage: Use a minimal Node.js runtime for the final image
 FROM node:18-alpine
+
+# Update npm to the latest version
+RUN npm install -g npm@latest
 
 # Set the working directory
 WORKDIR /app
