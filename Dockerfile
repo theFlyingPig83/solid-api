@@ -1,52 +1,41 @@
-# Stage 1: Build Stage
+# Use the latest Node.js LTS version with Alpine Linux
 FROM node:18-alpine AS builder
 
-# Update npm
-RUN npm install -g npm@latest
-
-# Explicitly create the /app directory and set it as the working directory
-RUN mkdir -p /app
+# Set the working directory
 WORKDIR /app
+
+# Debug: Check if /app was created by WORKDIR
+RUN ls -la /app || echo "/app does not exist yet"
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install production dependencies
-RUN npm ci --omit=dev && \
-    npm dedupe && \
-    npm cache clean --force && \
-    rm -rf /tmp/*
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Copy necessary application files
-COPY server.js ./server.js
-COPY src/ ./src
-COPY database/ ./database
-COPY .sequelizerc ./
+# Copy the necessary application files
+COPY server.js src/ database/ .sequelizerc ./
 
-# Stage 2: Production Stage
+# Use a minimal Node.js runtime for the final image
 FROM node:18-alpine
 
-# Update npm
-RUN npm install -g npm@latest
-
-# Explicitly create the /app directory and set it as the working directory
-RUN mkdir -p /app
+# Set the working directory
 WORKDIR /app
 
-# Copy node_modules and application files from builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/server.js ./server.js
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/database ./database
-COPY --from=builder /app/.sequelizerc ./
+# Copy the application files and dependencies from the builder stage
+COPY --from=builder /app ./
 
-# Set environment to production and create a non-root user
+# Set environment to production
 ENV NODE_ENV=production
+
+# Create a non-root user and set ownership
 RUN addgroup -S appgroup && adduser -S hcs522 -G appgroup && chown -R hcs522:appgroup /app
 
 # Switch to the non-root user
 USER hcs522
 
-# Expose port and start the application
+# Expose the application's port
 EXPOSE 5050
+
+# Start the application
 CMD ["node", "server.js"]
