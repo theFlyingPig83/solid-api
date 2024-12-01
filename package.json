@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "node server.js",
     "test": "mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
     "test:cov": "nyc mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
     "preinstall": "npx npm-force-resolutions",
