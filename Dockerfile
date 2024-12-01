@@ -1,45 +1,47 @@
-# Build Stage: Use the latest Node.js LTS version with Alpine Linux
+# Stage 1: Build Stage
 FROM node:18-alpine AS builder
 
 # Update npm to the latest version
 RUN npm install -g npm@latest
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install production dependencies
-RUN npm ci --omit=dev && npm cache clean --force
+# Install dependencies, including only production dependencies
+RUN npm ci --omit=dev && \
+    npm dedupe && \
+    npm cache clean --force
 
-# Copy the necessary application files
-COPY server.js src/ database/ .sequelizerc ./
+# Copy the rest of the application code
+COPY . .
 
-
-# Prod Stage: Use a minimal Node.js runtime for the final image
+# Stage 2: Production Stage
 FROM node:18-alpine
 
 # Update npm to the latest version
 RUN npm install -g npm@latest
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the application files and dependencies from the builder stage
+# Copy only the necessary files from the builder stage
 COPY --from=builder /app ./
 
-# Set environment to production
+# Set the environment to production
 ENV NODE_ENV=production
 
-# Create a non-root user and set ownership
-RUN addgroup -S appgroup && adduser -S hcs522 -G appgroup && chown -R hcs522:appgroup /app
+# Create a non-root user and group and set up permissions
+RUN addgroup -S appgroup && adduser -S hcs522 -G appgroup && \
+    chown -R hcs522:appgroup /app
 
 # Switch to the non-root user
 USER hcs522
 
-# Expose the application's port
+# Expose the application port
 EXPOSE 5050
 
-# Start the application
+# Start the application using node
 CMD ["node", "server.js"]
