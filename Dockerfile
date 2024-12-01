@@ -42,4 +42,4 @@ USER hcs522
 EXPOSE 5050
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
