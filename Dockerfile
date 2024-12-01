@@ -13,11 +13,14 @@ COPY package*.json ./
 # Install production dependencies
 RUN npm ci --omit=dev && npm dedupe && npm cache clean --force
 
-# Copy the necessary application files
-COPY server.js src/ database/ .sequelizerc ./
+# Copy the necessary application files explicitly
+COPY ./server.js /app/server.js
+COPY ./src /app/src
+COPY ./database /app/database
+COPY ./.sequelizerc /app/
 
 
-# Prod Stage: Use a minimal Node.js runtime for the final image
+# Production Stage: Use a minimal Node.js runtime for the final image
 FROM node:18-alpine
 
 # Update npm to the latest version
@@ -27,7 +30,7 @@ RUN npm install -g npm@latest
 WORKDIR /app
 
 # Copy the application files and dependencies from the builder stage
-COPY --from=builder /app ./
+COPY --from=builder /app /app
 
 # Set environment to production
 ENV NODE_ENV=production
