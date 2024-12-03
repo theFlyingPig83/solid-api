@@ -6,7 +6,7 @@ metadata:
   labels:
     app: node-api
 spec:
-  replicas: 4
+  replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:

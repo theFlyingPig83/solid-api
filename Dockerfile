@@ -1,36 +1,29 @@
 # Build Stage: Use the latest Node.js LTS version with Alpine Linux
 FROM node:18-alpine AS builder
 
-# Update npm to the latest version
+# Update npm to the latest version and set the working directory
 RUN npm install -g npm@latest
-
-# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json and install production dependencies
 COPY package*.json ./
+RUN npm ci --omit=dev && npm dedupe && npm prune
 
-# Install production dependencies
-RUN npm ci --omit=dev && npm dedupe && npm cache clean --force
+# Copy the necessary application files
+COPY --exclude=node_modules . ./app
 
-# Copy the necessary application files explicitly
-COPY ./server.js /app/server.js
-COPY ./src /app/src
-COPY ./database /app/database
-COPY ./.sequelizerc /app/
+# Compile using ncc to minify image size
+RUN npx ncc build server.js -o dist
 
 
 # Production Stage: Use a minimal Node.js runtime for the final image
-FROM node:18-alpine
-
-# Update npm to the latest version
-RUN npm install -g npm@latest
+FROM node:18-slim
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the application files and dependencies from the builder stage
-COPY --from=builder /app /app
+# Copy the compiled application from the builder stage
+COPY --from=builder /app/dist /app
 
 # Set environment to production
 ENV NODE_ENV=production
