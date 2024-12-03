@@ -6,10 +6,15 @@
   "scripts": {
     "start": "nodemon server.js",
     "test": "mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
-    "test:cov": "npx nyc npx mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
+    "test:cov": "nyc mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
+    "preinstall": "npx npm-force-resolutions",
     "dev:db:create": "npx sequelize-cli --env dev db:create",
     "dev:db:drop": "npx sequelize-cli --env dev db:drop",
-    "dev:db:migrate": "npx sequelize-cli --env dev db:migrate"
+    "dev:db:migrate": "npx sequelize-cli --env dev db:migrate",
+    "prod:db:create": "npx sequelize-cli --env prod db:create",
+    "prod:db:drop": "npx sequelize-cli --env prod db:drop",
+    "prod:db:migrate": "npx sequelize-cli --env prod db:migrate",
+    "prod:db:seed": "npx sequelize-cli --env prod db:seed"
   },
   "repository": {
     "type": "git",
@@ -34,12 +39,18 @@
     "nyc": "^15.1.0",
     "pg": "^8.11.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.31.1",
+    "sequelize": "^6.37.5",
     "sinon": "^15.1.0",
-    "stub": "^0.3.2"
+    "stub": "^0.3.2",
+    "supertest": "^6.3.3",
+    "cross-spawn": "7.0.6"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22",
-    "sequelize-cli": "^6.6.0"
-  }
+    "nodemon": "^3.1.7",
+    "npm-force-resolutions": "^0.0.10",
+    "sequelize-cli": "^6.6.2"
+  },
+  "resolutions": {
+    "cross-spawn": "7.0.6"
+  }  
 }

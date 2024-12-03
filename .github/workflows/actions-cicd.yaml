@@ -1,0 +1,217 @@
+name: GitHub Actions CI/CD Pipeline for Node.js API with SonarQube, Trivy, Docker and K3S Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+      - hcs522-devops-pipeline
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fullstack-challenge-dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # disable shallow cloning for SonarQbue
+
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ github.ref }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ github.ref }}-
+            ${{ runner.os }}-node-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: |
+          npm ci --omit=dev
+          npm dedupe
+
+      - name: Set Database Environment Variables
+        run: |
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
+          echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+          echo "DB_PORT=5432" >> $GITHUB_ENV
+
+      - name: Run Database Setup
+        run: |
+          npm run dev:db:drop
+          npm run dev:db:create
+          npm run dev:db:migrate
+          #(extra for prod) npm run prod:db:seed
+
+      - name: Run Tests
+        run: npm run test
+
+      - name: Generate Test Coverage Report
+        run: |
+          npm run test:cov
+          mv coverage/lcov.info coverage/coverage.lcov
+
+      - name: Code Quality Analysis with SonarQube
+        uses: sonarsource/sonarqube-scan-action@v1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
+
+      - name: Upload SonarQube Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonarqube-coverage-report
+          path: './coverage/coverage.lcov'
+
+      - name: Wait for SonarQube Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@v1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST }}
+
+      - name: Install jq if not already installed
+        run: |
+          if ! command -v jq &> /dev/null
+          then
+            echo "jq is not installed. Installing jq..."
+            sudo apt-get update && sudo apt-get install -y jq
+          else
+            echo "jq is already installed."
+          fi
+
+      - name: Create Directory for Trivy Reports
+        run: mkdir -p ./trivy-reports
+
+      - name: Dependency Scan with Trivy
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          scan-type: 'fs'
+          format: 'json'
+          output: './trivy-reports/trivy-dependency-check.json'
+
+      - name: Extract Trivy Vulnerability Counts
+        run: |
+          CRITICAL_COUNT=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[] | select(.Severity == "CRITICAL")] | length' ./trivy-reports/trivy-dependency-check.json)
+          HIGH_COUNT=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[] | select(.Severity == "HIGH")] | length' ./trivy-reports/trivy-dependency-check.json)
+          echo "Critical Vulnerabilities: $CRITICAL_COUNT"
+          echo "High Vulnerabilities: $HIGH_COUNT"
+
+      - name: Upload Trivy Dependency Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-dependency-check-report
+          path: './trivy-reports/trivy-dependency-check.json'
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: |
+          LOWERCASE_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_TAG=ghcr.io/$LOWERCASE_REPO/node-api:${{ github.sha }}
+          docker build -t $IMAGE_TAG .
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Create Directory for Trivy Reports
+        run: mkdir -p ./trivy-reports
+
+      - name: Cache Trivy Vulnerability Database
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-cache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-trivy-cache-
+
+      - name: Scan Docker Image with Trivy
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.IMAGE_TAG }}
+          format: 'json'
+          output: 'trivy-reports/docker_scan_report.json'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          vuln-type: library
+          cache-dir: ~/.cache/trivy
+
+      - name: Upload Trivy Docker Image Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-docker-image-scan-report
+          path: './trivy-reports/docker_scan_report.json'
+
+      - name: Fail if Vulnerabilities Found
+        run: |
+          VULN_COUNT=$(jq '.Results[].Vulnerabilities | length' trivy-reports/docker_scan_report.json | jq -s 'add')
+          if [ "$VULN_COUNT" -gt 0 ]; then
+            echo "Vulnerabilities found: $VULN_COUNT. Failing the pipeline."
+            exit 1
+          else
+            echo "No vulnerabilities found."
+          fi
+
+      - name: Push Docker Image to GitHub Container Registry
+        run: |
+          docker push $IMAGE_TAG
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create Namespace if Not Exists
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > ~/.kube/config
+          kubectl config use-context digitalocean-k3s-context
+          kubectl get namespace solid-api-2024 || kubectl create namespace solid-api-2024
+
+      - name: Update Deployment Manifests with Image Tag
+        working-directory: ${{ github.workspace }}
+        run: |
+          sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
+
+      - name: Deploy to K3s Kubernetes Cluster
+        run: kubectl apply -f k3s-deployment.yaml

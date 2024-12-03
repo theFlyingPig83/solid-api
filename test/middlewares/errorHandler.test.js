@@ -1,14 +1,23 @@
+// test/middlewares/errorHandler.test.js
+
 'use strict';
 
 const chai = require('chai');
 const sinon = require('sinon');
 const { expect } = chai;
-const {errorHandler} = require('../../src/middlewares/errorHandler');
+const { errorHandler } = require('../../src/middlewares/errorHandler');
 const HttpStatusCode = require('../../src/constants/HttpStatusCode');
 const ServerErrors = require('../../src/constants/ServerErrors');
 
-describe('errorHandler - Suit Test', () => {
+describe('errorHandler - Suite Test', () => {
+  beforeEach(() => {
+    // Stub console.error to suppress error logs during testing
+    sinon.stub(console, 'error');
+  });
+
   afterEach(() => {
+    // Restore console.error after each test
+    console.error.restore();
     sinon.restore();
   });
 
@@ -24,10 +33,12 @@ describe('errorHandler - Suit Test', () => {
     errorHandler(err, req, res, next);
 
     expect(res.status.calledOnceWith(HttpStatusCode.INTERNAL_ERROR)).to.be.true;
-    expect(res.json.calledOnceWith({
-      error: ServerErrors.INTERNAL_ERROR_MESSAGE,
-      uiMessage: ServerErrors.INTERNAL_ERROR_UI_MESSAGE,
-    })).to.be.true;
+    expect(
+      res.json.calledOnceWith({
+        error: ServerErrors.INTERNAL_ERROR_MESSAGE,
+        uiMessage: ServerErrors.INTERNAL_ERROR_UI_MESSAGE,
+      })
+    ).to.be.true;
     expect(next.notCalled).to.be.true;
   });
 
@@ -47,10 +58,12 @@ describe('errorHandler - Suit Test', () => {
     errorHandler(err, req, res, next);
 
     expect(res.status.calledOnceWith(err.httpStatus)).to.be.true;
-    expect(res.json.calledOnceWith({
-      error: err.message,
-      uiMessage: err.uiMessage,
-    })).to.be.true;
+    expect(
+      res.json.calledOnceWith({
+        error: err.message,
+        uiMessage: err.uiMessage,
+      })
+    ).to.be.true;
     expect(next.notCalled).to.be.true;
   });
 });
