@@ -136,6 +136,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # - name: Enable Docker BuildKit
+      #   run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -143,57 +146,56 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Cache Slim Toolkit and Vulnerability Database
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.slim
-            ~/.cache/trivy
-          key: ${{ runner.os }}-toolkit-trivy-cache-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-toolkit-trivy-cache-
-
       - name: Build Docker Image
         run: |
-          export IMAGE_TAG=ghcr.io/theflyingpig83/solid-api/node-api:${{ github.sha }}
+          LOWERCASE_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_TAG=ghcr.io/$LOWERCASE_REPO/node-api:${{ github.sha }}
           docker build -t $IMAGE_TAG .
-          docker push $IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Build and Optimize Docker Image with Slim
-        uses: kitabisa/docker-slim-action@v1.1.2
+      - name: Create Directory for Trivy Reports
+        run: mkdir -p ./trivy-reports
+
+      - name: Cache Trivy Vulnerability Database
+        uses: actions/cache@v3
         with:
-          target: ${{ env.IMAGE_TAG }}
-          tag: ${{ env.IMAGE_TAG }}-slim
-        env:
-          DSLIM_HTTP_PROBE: false
-          DSLIM_USE_DOCKER_AUTH: true
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-cache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-trivy-cache-
 
-      - name: Scan Slimmed Docker Image with Trivy
+      - name: Scan Docker Image with Trivy
         uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: image
-          image-ref: ${{ env.IMAGE_TAG }}-slim
-          format: json
-          output: trivy-reports/docker_scan_report_slim.json
-          severity: CRITICAL,HIGH
+          image-ref: ${{ env.IMAGE_TAG }}
+          format: 'json'
+          output: 'trivy-reports/docker_scan_report.json'
+          severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
+          vuln-type: library
+          cache-dir: ~/.cache/trivy
+
+      - name: Upload Trivy Docker Image Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-docker-image-scan-report
+          path: './trivy-reports/docker_scan_report.json'
 
       - name: Fail if Vulnerabilities Found
         run: |
-          VULN_COUNT=$(jq '.Results[].Vulnerabilities | length' trivy-reports/docker_scan_report_slim.json | jq -s 'add')
+          VULN_COUNT=$(jq '.Results[].Vulnerabilities | length' trivy-reports/docker_scan_report.json | jq -s 'add')
           if [ "$VULN_COUNT" -gt 0 ]; then
-            echo "Vulnerabilities found in slimmed image: $VULN_COUNT. Failing the pipeline."
+            echo "Vulnerabilities found: $VULN_COUNT. Failing the pipeline."
             exit 1
           else
             echo "No vulnerabilities found."
           fi
 
-      - name: Push Slimmed Docker Image
+      - name: Push Docker Image to GitHub Container Registry
         run: |
-          SLIM_IMAGE_TAG=${{ env.IMAGE_TAG }}-slim
-          docker tag $IMAGE_TAG $SLIM_IMAGE_TAG
-          docker push $SLIM_IMAGE_TAG
+          docker push $IMAGE_TAG
 
   deploy:
     runs-on: ubuntu-latest
@@ -212,7 +214,8 @@ jobs:
       - name: Update Deployment Manifests with Image Tag
         working-directory: ${{ github.workspace }}
         run: |
-          sed -i "s|<SLIM_IMAGE_TAG>|${{ github.sha }}-slim|g" k3s-deployment.yaml
+          sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
 
       - name: Deploy to K3s Kubernetes Cluster
         run: kubectl apply -f k3s-deployment.yaml
+        
