@@ -2,7 +2,7 @@
 FROM node:18.18.0-alpine AS builder
 
 # Update npm to the latest version
-# RUN npm install -g npm@latest
+RUN npm install -g npm@latest
 
 # Set the working directory
 WORKDIR /app
@@ -24,7 +24,7 @@ COPY ./.sequelizerc /app/
 FROM node:18.18.0-slim
 
 # Update npm to the latest version
-# RUN npm install -g npm@latest
+RUN npm install -g npm@latest
 
 # Set the working directory
 WORKDIR /app
