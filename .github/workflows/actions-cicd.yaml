@@ -115,8 +115,8 @@ jobs:
 
       - name: Extract Trivy Vulnerability Counts
         run: |
-          CRITICAL_COUNT=$(jq '.Results[].Vulnerabilities | map(select(.Severity == "CRITICAL")) | length' ./trivy-reports/trivy-dependency-check.json | jq -s 'add')
-          HIGH_COUNT=$(jq '.Results[].Vulnerabilities | map(select(.Severity == "HIGH")) | length' ./trivy-reports/trivy-dependency-check.json | jq -s 'add')
+          CRITICAL_COUNT=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[] | select(.Severity == "CRITICAL")] | length' ./trivy-reports/trivy-dependency-check.json)
+          HIGH_COUNT=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[] | select(.Severity == "HIGH")] | length' ./trivy-reports/trivy-dependency-check.json)
           echo "Critical Vulnerabilities: $CRITICAL_COUNT"
           echo "High Vulnerabilities: $HIGH_COUNT"
 
