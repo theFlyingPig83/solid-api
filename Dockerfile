@@ -10,7 +10,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev && npm dedupe && npm prune
 
 # Copy the necessary application files
-COPY --exclude=node_modules . ./app
+COPY . ./app
 
 # Compile using ncc to minify image size
 RUN npx ncc build server.js -o dist
