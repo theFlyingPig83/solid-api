@@ -240,7 +240,7 @@ jobs:
       - name: Update Deployment Manifests with Image Tag
         working-directory: ${{ github.workspace }}
         run: |
-          sed -i "s|<SLIM_IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
+          sed -i "s|<SLIM_IMAGE_TAG>|${{ github.sha }}-slim|g" k3s-deployment.yaml
 
       - name: Deploy to K3s Kubernetes Cluster
         run: kubectl apply -f k3s-deployment.yaml
