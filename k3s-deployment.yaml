@@ -5,8 +5,9 @@ metadata:
   namespace: solid-api-2024
   labels:
     app: node-api
+    pod-security.kubernetes.io/enforce: restricted
 spec:
-  replicas: 5
+  replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -25,6 +26,11 @@ spec:
       containers:
         - name: node-api
           image: ghcr.io/theflyingpig83/solid-api/node-api:<IMAGE_TAG>
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 5050
           resources:
