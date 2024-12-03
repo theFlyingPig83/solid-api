@@ -159,16 +159,17 @@ jobs:
       - name: Build and Optimize Docker Image with Slim
         uses: kitabisa/docker-slim-action@v1.1.2
         with:
-          target: ghcr.io/theflyingpig83/solid-api/node-api:${{ github.sha }}
+          target: ${{ env.IMAGE_TAG }}
           tag: slim
         env:
           DSLIM_HTTP_PROBE: false
+          DSLIM_USE_DOCKER_AUTH: true
 
       - name: Scan Slimmed Docker Image with Trivy
         uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: image
-          image-ref: ghcr.io/theflyingpig83/solid-api/node-api:${{ github.sha }}-slim
+          image-ref: ${{ env.IMAGE_TAG }}
           format: json
           output: trivy-reports/docker_scan_report_slim.json
           severity: CRITICAL,HIGH
@@ -186,7 +187,7 @@ jobs:
 
       - name: Push Slimmed Docker Image
         run: |
-          docker push ghcr.io/theflyingpig83/solid-api/node-api:${{ github.sha }}
+          docker $IMAGE_TAG
 
   deploy:
     runs-on: ubuntu-latest
@@ -205,7 +206,7 @@ jobs:
       - name: Update Deployment Manifests with Image Tag
         working-directory: ${{ github.workspace }}
         run: |
-          sed -i "s|<SLIM_IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
+          sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
 
       - name: Deploy to K3s Kubernetes Cluster
         run: kubectl apply -f k3s-deployment.yaml

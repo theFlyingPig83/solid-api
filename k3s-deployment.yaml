@@ -6,7 +6,7 @@ metadata:
   labels:
     app: node-api
 spec:
-  replicas: 3
+  replicas: 5
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -24,7 +24,7 @@ spec:
         - name: hcs522-ghcr-secret
       containers:
         - name: node-api
-          image: ghcr.io/theflyingpig83/solid-api/node-api:<SLIM_IMAGE_TAG>
+          image: ghcr.io/theflyingpig83/solid-api/node-api:<IMAGE_TAG>
           ports:
             - containerPort: 5050
           resources:
