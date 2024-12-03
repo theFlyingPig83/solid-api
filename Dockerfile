@@ -13,7 +13,7 @@ RUN npm ci --omit=dev && npm dedupe && npm prune
 COPY . ./app
 
 # Compile using ncc to minify image size
-RUN npx ncc build server.js -o dist
+RUN npm install @vercel/ncc && npx ncc build server.js -o dist && npm uninstall @vercel/ncc
 
 
 # Production Stage: Use a minimal Node.js runtime for the final image
