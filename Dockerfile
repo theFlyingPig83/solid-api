@@ -22,7 +22,8 @@ RUN npm install @vercel/ncc && npx ncc build server.js -o dist && npm uninstall 
 # Production Stage: Use a minimal Node.js runtime for the final image
 FROM node:18-slim
 
-# Set the working directory
+# Update npm to the latest version and set the working directory
+RUN npm install -g npm@latest
 WORKDIR /app
 
 # Copy the compiled application from the builder stage
