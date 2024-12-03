@@ -9,8 +9,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev && npm dedupe && npm prune
 
-# Copy the necessary application files
-COPY . ./app
+# Copy the necessary application files explicitly to maintain structure and avoid nested directories
+COPY server.js . 
+COPY src ./src
+COPY database ./database
+COPY .sequelizerc .
 
 # Compile using ncc to minify image size
 RUN npm install @vercel/ncc && npx ncc build server.js -o dist && npm uninstall @vercel/ncc
