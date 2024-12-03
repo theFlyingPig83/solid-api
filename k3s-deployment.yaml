@@ -28,8 +28,6 @@ spec:
           image: ghcr.io/theflyingpig83/solid-api/node-api:<IMAGE_TAG>
           securityContext:
             runAsNonRoot: true
-            runAsUser: 1001
-            runAsGroup: 1001
             allowPrivilegeEscalation: false
           ports:
             - containerPort: 5050
