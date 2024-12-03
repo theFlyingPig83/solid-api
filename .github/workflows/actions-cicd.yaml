@@ -146,7 +146,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-       - name: Cache Slim Toolkit and Vulnerability Database
+      - name: Cache Slim Toolkit and Vulnerability Database
         uses: actions/cache@v3
         with:
           path: |
@@ -186,7 +186,7 @@ jobs:
 
       - name: Push Slimmed Docker Image
         run: |
-          docker push ghcr.io/theflyingpig83/solid-api/node-api:${{ github.sha }
+          docker push ghcr.io/theflyingpig83/solid-api/node-api:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
