@@ -163,7 +163,7 @@ jobs:
       - name: Build and Optimize Docker Image with Slim
         uses: kitabisa/docker-slim-action@v1.1.2
         with:
-          target: ${{ env.IMAGE_TAG }}
+          target: ${{ env.IMAGE_TAG }}-slim
           tag: slim
         env:
           DSLIM_HTTP_PROBE: false
@@ -192,6 +192,7 @@ jobs:
       - name: Push Slimmed Docker Image
         run: |
           SLIM_IMAGE_TAG=${{ env.IMAGE_TAG }}-slim
+          docker tag $IMAGE_TAG $SLIM_IMAGE_TAG
           docker push $SLIM_IMAGE_TAG
 
   deploy:
