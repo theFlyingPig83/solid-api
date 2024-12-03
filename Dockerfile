@@ -1,9 +1,6 @@
 # Build Stage: Use the latest Node.js LTS version with Alpine Linux
 FROM node:18-alpine AS builder
 
-# Update npm to the latest version
-RUN npm install -g npm@latest
-
 # Set the working directory
 WORKDIR /app
 
@@ -22,9 +19,6 @@ COPY ./.sequelizerc /app/
 
 # Production Stage: Use a minimal Node.js runtime for the final image
 FROM node:18-slim
-
-# Update npm to the latest version
-RUN npm install -g npm@latest
 
 # Set the working directory
 WORKDIR /app

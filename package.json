@@ -42,7 +42,8 @@
     "sequelize": "^6.37.5",
     "sinon": "^15.1.0",
     "stub": "^0.3.2",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.3",
+    "cross-spawn": "7.0.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.7",
