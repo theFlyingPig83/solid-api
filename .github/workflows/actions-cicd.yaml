@@ -157,14 +157,25 @@ jobs:
       - name: Create Directory for Trivy Reports
         run: mkdir -p ./trivy-reports
 
+      - name: Cache Trivy Vulnerability Database
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-cache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-trivy-cache-
+
       - name: Scan Docker Image with Trivy
         uses: aquasecurity/trivy-action@0.29.0
         with:
+          scan-type: image
           image-ref: ${{ env.IMAGE_TAG }}
           format: 'json'
           output: 'trivy-reports/docker_scan_report.json'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
+          vuln-type: library
+          cache-dir: ~/.cache/trivy
 
       - name: Upload Trivy Docker Image Scan Report
         uses: actions/upload-artifact@v4
