@@ -25,9 +25,6 @@ spec:
       containers:
         - name: node-api
           image: ghcr.io/theflyingpig83/solid-api/node-api:<SLIM_IMAGE_TAG>
-          securityContext:
-            runAsNonRoot: true
-            allowPrivilegeEscalation: false
           ports:
             - containerPort: 5050
           resources:
