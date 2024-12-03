@@ -165,37 +165,47 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-cache-
 
-      - name: Scan Docker Image with Trivy
+      - name: Minify Docker Image
+        uses: kitabisa/docker-slim-action@v1.1.2
+        with:
+          target: ${{ env.IMAGE_TAG }}
+          tag: slim
+        env:
+          DSLIM_HTTP_PROBE: false
+
+      - name: Scan Slimmed Docker Image with Trivy
         uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: image
-          image-ref: ${{ env.IMAGE_TAG }}
+          image-ref: ${{ env.IMAGE_TAG }}-slim
           format: 'json'
-          output: 'trivy-reports/docker_scan_report.json'
+          output: 'trivy-reports/docker_scan_report_slim.json'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           vuln-type: library
           cache-dir: ~/.cache/trivy
 
-      - name: Upload Trivy Docker Image Scan Report
+      - name: Upload Trivy Slimmed Docker Image Scan Report
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-docker-image-scan-report
-          path: './trivy-reports/docker_scan_report.json'
+          name: trivy-docker-image-scan-report-slim
+          path: './trivy-reports/docker_scan_report_slim.json'
 
-      - name: Fail if Vulnerabilities Found
+      - name: Fail if Vulnerabilities Found in Slimmed Image
         run: |
-          VULN_COUNT=$(jq '.Results[].Vulnerabilities | length' trivy-reports/docker_scan_report.json | jq -s 'add')
+          VULN_COUNT=$(jq '.Results[].Vulnerabilities | length' trivy-reports/docker_scan_report_slim.json | jq -s 'add')
           if [ "$VULN_COUNT" -gt 0 ]; then
-            echo "Vulnerabilities found: $VULN_COUNT. Failing the pipeline."
+            echo "Vulnerabilities found in slimmed image: $VULN_COUNT. Failing the pipeline."
             exit 1
           else
-            echo "No vulnerabilities found."
+            echo "No vulnerabilities found in slimmed image."
           fi
 
-      - name: Push Docker Image to GitHub Container Registry
+      - name: Push Slimmed Docker Image to GitHub Container Registry
         run: |
-          docker push $IMAGE_TAG
+          SLIM_IMAGE_TAG=${{ env.IMAGE_TAG }}-slim
+          docker tag ${{ env.IMAGE_TAG }}-slim $SLIM_IMAGE_TAG
+          docker push $SLIM_IMAGE_TAG
 
   deploy:
     runs-on: ubuntu-latest
@@ -214,7 +224,7 @@ jobs:
       - name: Update Deployment Manifests with Image Tag
         working-directory: ${{ github.workspace }}
         run: |
-          sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
+          sed -i "s|<SLIM_IMAGE_TAG>|${{ github.sha }}|g" k3s-deployment.yaml
 
       - name: Deploy to K3s Kubernetes Cluster
         run: kubectl apply -f k3s-deployment.yaml
