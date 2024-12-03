@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for Node.js API with SonarQube
+name: CI/CD Pipeline for Node.js API with SonarQube, Trivy, Docker, K3S Kubernetes and Docker Slim
 
 on:
   push:
