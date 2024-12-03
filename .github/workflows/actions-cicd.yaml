@@ -146,6 +146,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Cache Slim Toolkit
+        uses: actions/cache@v3
+        with:
+          path: ~/.slim
+          key: slim-${{ runner.os }}-1.40.11
+          restore-keys: |
+            slim-${{ runner.os }}-
+
+      - name: Install Slim Toolkit
+        if: steps.cache.outputs.cache-hit != 'true' # Skip if cache is restored
+        run: |
+          mkdir -p ~/.slim
+          curl -L https://downloads.dockerslim.com/releases/1.40.11/dist_linux.tar.gz | tar -xz -C ~/.slim --strip-components=1
+
+      - name: Verify Slim Toolkit Installation
+        run: ~/.slim/slim --version
+
       - name: Build Docker Image
         run: |
           LOWERCASE_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
@@ -165,13 +182,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-cache-
 
-      - name: Minify Docker Image
-        uses: kitabisa/docker-slim-action@v1.1.2
-        with:
-          target: ${{ env.IMAGE_TAG }}
-          tag: slim
-        env:
-          DSLIM_HTTP_PROBE: false
+      - name: Optimize Docker Image
+        run: |
+          ~/.slim/slim build \
+          --target ghcr.io/theflyingpig83/solid-api/node-api:${{ github.sha }} \
+          --tag ghcr.io/theflyingpig83/solid-api/node-api:${{ github.sha }}-slim \
+          --continue-after 1
 
       - name: Scan Slimmed Docker Image with Trivy
         uses: aquasecurity/trivy-action@0.29.0
