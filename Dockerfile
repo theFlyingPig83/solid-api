@@ -32,7 +32,7 @@ COPY --from=builder /app/dist /app
 ENV NODE_ENV=production
 
 # Create a non-root user and set ownership
-RUN addgroup -S appgroup && adduser -S hcs522 -G appgroup && chown -R hcs522:appgroup /app
+RUN addgroup appgroup && adduser -G appgroup -D hcs522 && chown -R hcs522:appgroup /app
 
 # Switch to the non-root user
 USER hcs522
