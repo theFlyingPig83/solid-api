@@ -20,8 +20,9 @@ COPY ./database /app/database
 COPY ./.sequelizerc /app/
 
 
-# Production Stage: Use a minimal Node.js runtime for the final image
-FROM node:18.18.0-slim
+# Production Stage
+FROM node:18.18.0-alpine
+
 
 # Update npm to the latest version
 RUN npm install -g npm@latest
@@ -36,9 +37,7 @@ COPY --from=builder /app /app
 ENV NODE_ENV=production
 
 # Create a non-root user and set ownership
-RUN groupadd appgroup && \
-    useradd -g appgroup -m -d /home/hcs522 hcs522 && \
-    chown -R hcs522:appgroup /app
+RUN addgroup -S appgroup && adduser -S hcs522 -G appgroup && chown -R hcs522:appgroup /app
 
 # Switch to the non-root user
 USER hcs522

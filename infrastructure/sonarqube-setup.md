@@ -1,7 +1,8 @@
 SONARQUBE server setup
 
 1. SSH into the SonarQube server provisioned 
-2. Run the bash script below
+2. Run the bash script below (installing Community version 9.9.0.65466)
+
 
 ```
 #!/bin/bash
@@ -115,8 +116,9 @@ sudo systemctl enable sonarqube
 echo "SonarQube setup completed successfully! You can access it at http://<sonarqube_node_ip>:9000"
 ```
 
-3. This script can be customized to upgrade SonarQube to the latest versions. 
 
-4. The SonarQube service is now available at http://<sonarqube_node_ip>:9000
+3. This script can be customized to upgrade SonarQube to the latest versions. However, the Developer Edition is the minimal subscription to recommend.  
+
+4. The SonarQube service is now available at http://<sonarqube_node_ip>:9000 (Please apply cert to make it secure: https://<sonarqube_node_ip>:9000)
 
 5. We can now log on to change the passwords, create new users, generate analysis token, create projects and adjust the security and permissions configurations according to https://docs.sonarsource.com/sonarqube/10.5/try-out-sonarqube/

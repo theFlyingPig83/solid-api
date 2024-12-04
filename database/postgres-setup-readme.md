@@ -1,5 +1,6 @@
-Per codebase review, PostgreSQL should be deployed as a stateful service to ensure data persistence and stability. 
-Here’s how we can set it up step-by-step:
+
+For this application, PostgreSQL is required as a stateful service to ensure data persistence and stability. Here’s how we can set it up step-by-step:
+
 
 Step 1: Create a Namespace for PostgreSQL
 First, create a dedicated namespace for PostgreSQL to keep it isolated and organized:
@@ -29,6 +30,7 @@ spec:
       storage: 5Gi
 
 ```
+
 Next, apply the PersistentVolumeClaim:
 
 ```
@@ -132,6 +134,7 @@ Apply the service:
 kubectl apply -f postgres-service.yaml
 ```
 
+
 Step 5: Verify the Setup
 
 1. Check the Pods:
@@ -150,7 +153,8 @@ We should see a ClusterIP service named postgres listening on port 5432.
 
 Step 6: Update Application to Use PostgreSQL
 
-Now that PostgreSQL is running in the cluster, we need to update the testbed application's configuration to connect to this database: (in database/config.json)(here it aligns with industry best practice)
+
+Now that PostgreSQL is running in the cluster, we need to update the testbed application's configuration to connect to this database: (in database/config.json)(here it aligns with industry best practice for "prod")
 
 ```
 {
@@ -180,8 +184,11 @@ Now that PostgreSQL is running in the cluster, we need to update the testbed app
 }
 
 ```
-- Update the environment variables in the application deployment manifest to point to the PostgreSQL service.
-- Example environment variables for Node.JS app:
+
+
+Step 7: Update the environment variables in the application deployment manifest(Kubernetes) to point to the PostgreSQL service
+
+Example environment variables for Node.JS app:
 
 ```
 apiVersion: apps/v1
@@ -231,10 +238,25 @@ spec:
 Note: The DB_HOST is set to postgres.postgres.svc.cluster.local, which is the internal DNS for accessing the postgres service in the postgres namespace.
 
 
+Misc:
+1. Don't forget that we need to continuously enhance the security of the deployment manifest(Kubernetes). 
+2. Also, creating an image pull secret is required for securely pulling docker image from GHCR.
+Example:
+```
+kubectl create secret docker-registry <the_imagePullSecret_name> \
+  --docker-server=ghcr.io \
+  --docker-username=<your-ghcr-username> \
+  --docker-password=<your-ghcr-personal-access-token> \
+  --docker-email=<your-email>
+```
+
+
 Summary of PostgreSQL Setup:
 
 1. Create Namespace for PostgreSQL to keep it organized.
 2. Create Persistent Storage using a PersistentVolumeClaim to store database data.
 3. Deploy PostgreSQL as a deployment with environment variables.
 4. Expose PostgreSQL as a ClusterIP service for internal cluster access.
-5. Update Application Configuration to connect to PostgreSQL using the internal service DNS name.
+5. Verify pods and services are working as expected.
+6. Update Application Configuration to connect to PostgreSQL using the internal service DNS name.
+7. Update the environment variables in the application deployment manifest.

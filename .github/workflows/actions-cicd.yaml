@@ -143,13 +143,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker Image
+      - name: Cache Docker Layers
+        uses: actions/cache@v3
+        with:
+          path: ~/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
+      - name: Build Docker Image with Local Cache
         run: |
           LOWERCASE_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_TAG=ghcr.io/$LOWERCASE_REPO/node-api:${{ github.sha }}
-          docker build -t $IMAGE_TAG .
+          docker buildx build --cache-from=type=local,src=~/.buildx-cache \
+                              --cache-to=type=local,dest=~/.buildx-cache \
+                              -t $IMAGE_TAG --load .
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Create Directory for Trivy Reports
         run: mkdir -p ./trivy-reports
@@ -162,7 +171,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-cache-
 
-      - name: Scan Docker Image with Trivy
+      - name: Scan Docker Image with Trivy Locally
         uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: image
