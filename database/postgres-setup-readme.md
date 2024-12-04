@@ -1,4 +1,6 @@
+
 For this application, PostgreSQL is required as a stateful service to ensure data persistence and stability. Here’s how we can set it up step-by-step:
+
 
 Step 1: Create a Namespace for PostgreSQL
 First, create a dedicated namespace for PostgreSQL to keep it isolated and organized:
@@ -30,7 +32,6 @@ spec:
 ```
 
 Next, apply the PersistentVolumeClaim:
-
 
 ```
 kubectl apply -f postgres-pvc.yaml
@@ -152,6 +153,7 @@ We should see a ClusterIP service named postgres listening on port 5432.
 
 Step 6: Update Application to Use PostgreSQL
 
+
 Now that PostgreSQL is running in the cluster, we need to update the testbed application's configuration to connect to this database: (in database/config.json)(here it aligns with industry best practice for "prod")
 
 ```
@@ -247,6 +249,7 @@ kubectl create secret docker-registry <the_imagePullSecret_name> \
   --docker-password=<your-ghcr-personal-access-token> \
   --docker-email=<your-email>
 ```
+
 
 Summary of PostgreSQL Setup:
 

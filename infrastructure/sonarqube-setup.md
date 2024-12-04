@@ -3,6 +3,7 @@ SONARQUBE server setup
 1. SSH into the SonarQube server provisioned 
 2. Run the bash script below (installing Community version 9.9.0.65466)
 
+
 ```
 #!/bin/bash
 
@@ -114,6 +115,7 @@ sudo systemctl enable sonarqube
 # Print success message
 echo "SonarQube setup completed successfully! You can access it at http://<sonarqube_node_ip>:9000"
 ```
+
 
 3. This script can be customized to upgrade SonarQube to the latest versions. However, the Developer Edition is the minimal subscription to recommend.  
 

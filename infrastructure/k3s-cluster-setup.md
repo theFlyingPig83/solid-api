@@ -82,4 +82,6 @@ kubectl get nodes
 
 ```
 
+
 We should see both the master and worker nodes listed locally!
+
