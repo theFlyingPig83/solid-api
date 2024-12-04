@@ -7,7 +7,6 @@
     "start": "nodemon server.js",
     "test": "mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
     "test:cov": "nyc mocha ./test/**/*.test.js --recursive --exit --timeout=5000",
-    "preinstall": "npx npm-force-resolutions",
     "dev:db:create": "npx sequelize-cli --env dev db:create",
     "dev:db:drop": "npx sequelize-cli --env dev db:drop",
     "dev:db:migrate": "npx sequelize-cli --env dev db:migrate",
@@ -47,10 +46,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.7",
-    "npm-force-resolutions": "^0.0.10",
     "sequelize-cli": "^6.6.2"
-  },
-  "resolutions": {
-    "cross-spawn": "7.0.6"
-  }  
+  }
 }
