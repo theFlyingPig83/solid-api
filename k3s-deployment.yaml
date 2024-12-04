@@ -5,7 +5,7 @@ metadata:
   namespace: solid-api-2024
   labels:
     app: node-api
-    pod-security.kubernetes.io/enforce: restricted
+    # pod-security.kubernetes.io/enforce: restricted (Placeholder: for clarity, this should be applied on namespace once codebase is production ready)
 spec:
   replicas: 3
   strategy:

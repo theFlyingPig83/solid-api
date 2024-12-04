@@ -21,7 +21,7 @@ COPY ./.sequelizerc /app/
 
 
 # Production Stage: Use a minimal Node.js runtime for the final image
-FROM node:18.18.0-slim
+FROM node:18.18.0-alpine
 
 # Update npm to the latest version
 RUN npm install -g npm@latest

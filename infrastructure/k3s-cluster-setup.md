@@ -30,6 +30,7 @@ sudo k3s kubectl get nodes
 node token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (masked)
 
 
+
 B. Worker Node
 
 1. Install K3s and Join the Master Node:
@@ -50,6 +51,7 @@ sudo k3s kubectl get nodes
 ```
 
 - We should see both the master and worker nodes listed.
+
 
 
 C. Set Up Kubeconfig for Managing the Cluster
