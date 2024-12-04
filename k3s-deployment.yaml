@@ -7,7 +7,7 @@ metadata:
     app: node-api
     # pod-security.kubernetes.io/enforce: restricted (Placeholder: for clarity, this should be applied on namespace once codebase is production ready)
 spec:
-  replicas: 2
+  replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:
