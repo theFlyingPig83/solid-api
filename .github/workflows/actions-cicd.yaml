@@ -160,7 +160,8 @@ jobs:
                               --cache-to=type=local,dest=~/.buildx-cache \
                               --cache-to=type=registry,ref=ghcr.io/$LOWERCASE_REPO/node-api:cache,mode=max \
                               -t $IMAGE_TAG .
-        
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
       - name: Create Directory for Trivy Reports
         run: mkdir -p ./trivy-reports
 
