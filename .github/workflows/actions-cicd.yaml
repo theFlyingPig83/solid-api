@@ -151,12 +151,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docker-
 
-      - name: Build Docker Image with Local Cache
+      - name: Build Docker Image with Remote and Local Cache
         run: |
           LOWERCASE_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_TAG=ghcr.io/$LOWERCASE_REPO/node-api:${{ github.sha }}
           docker buildx build --cache-from=type=local,src=~/.buildx-cache \
+                              --cache-from=type=registry,ref=ghcr.io/$LOWERCASE_REPO/node-api:cache \
                               --cache-to=type=local,dest=~/.buildx-cache \
+                              --cache-to=type=registry,ref=ghcr.io/$LOWERCASE_REPO/node-api:cache,mode=max \
                               -t $IMAGE_TAG --load .
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
@@ -167,7 +169,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/trivy
-          key: ${{ runner.os }}-trivy-cache-${{ github.sha }}
+          key: ${{ runner.os }}-trivy-cache-${{ hashFiles('Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-trivy-cache-
 
