@@ -155,11 +155,13 @@ jobs:
         run: |
           LOWERCASE_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_TAG=ghcr.io/$LOWERCASE_REPO/node-api:${{ github.sha }}
+          CACHE_TAG=ghcr.io/$LOWERCASE_REPO/node-api:cache
+          # Build and push the unique SHA image and update the cache image
           docker buildx build --cache-from=type=local,src=~/.buildx-cache \
-                              --cache-from=type=registry,ref=ghcr.io/$LOWERCASE_REPO/node-api:cache \
+                              --cache-from=type=registry,ref=$CACHE_TAG \
                               --cache-to=type=local,dest=~/.buildx-cache \
-                              --cache-to=type=registry,ref=ghcr.io/$LOWERCASE_REPO/node-api:cache,mode=max \
-                              -t $IMAGE_TAG --load .
+                              --cache-to=type=registry,ref=$CACHE_TAG,mode=max \
+                              -t $IMAGE_TAG --push .
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Create Directory for Trivy Reports
